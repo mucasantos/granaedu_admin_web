@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lms_admin/components/app_logo.dart';
+import 'package:lms_admin/components/language_switcher.dart';
 import 'package:lms_admin/configs/assets_config.dart';
 import 'package:lms_admin/providers/auth_state_provider.dart';
 import 'package:lms_admin/providers/user_data_provider.dart';
@@ -12,7 +13,7 @@ import 'package:lms_admin/services/auth_service.dart';
 import 'package:lms_admin/utils/next_screen.dart';
 import 'package:lms_admin/utils/toasts.dart';
 import 'package:rounded_loading_button_plus/rounded_loading_button.dart';
-import 'package:svg_flutter/svg.dart';
+import 'package:lms_admin/l10n/app_localizations.dart';
 
 
 class Login extends ConsumerStatefulWidget {
@@ -55,7 +56,7 @@ class _LoginState extends ConsumerState<Login> {
       } else {
         _btnCtlr.reset();
         if (!mounted) return;
-        openFailureToast(context, 'Email/Password is invalid');
+        openFailureToast(context, AppLocalizations.of(context).authInvalidCredentials);
       }
     }
   }
@@ -68,7 +69,7 @@ class _LoginState extends ConsumerState<Login> {
       if (!mounted) return;
       NextScreen.replaceAnimation(context, const Home());
     } else {
-      await AuthService().adminLogout().then((value) => openFailureToast(context, 'Access Denied'));
+      await AuthService().adminLogout().then((value) => openFailureToast(context, AppLocalizations.of(context).authAccessDenied));
     }
   }
 
@@ -91,7 +92,7 @@ class _LoginState extends ConsumerState<Login> {
               child: Flexible(
                 flex: 1,
                 fit: FlexFit.tight,
-                child: SvgPicture.asset(
+                child: Image.asset(
                   AssetsConfig.loginImageString,
                   alignment: Alignment.center,
                   height: 400,
@@ -120,8 +121,12 @@ class _LoginState extends ConsumerState<Login> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const AppLogo(imageString: AssetsConfig.logo, height: 60, width: 250),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: const [LanguageSwitcher()],
+                        ),
                         Text(
-                          'Sign In to the Admin Panel',
+                          AppLocalizations.of(context).loginSignInTitle,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.blueGrey),
                         ),
                         const SizedBox(
@@ -131,7 +136,7 @@ class _LoginState extends ConsumerState<Login> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Email',
+                              AppLocalizations.of(context).commonEmail,
                               style: Theme.of(context).textTheme.titleSmall,
                             ),
                             const SizedBox(
@@ -143,7 +148,7 @@ class _LoginState extends ConsumerState<Login> {
                                 keyboardType: TextInputType.emailAddress,
                                 controller: emailCtlr,
                                 validator: (value) {
-                                  if (value!.isEmpty) return 'Email is required';
+                                  if (value!.isEmpty) return AppLocalizations.of(context).validationEmailRequired;
                                   return null;
                                 },
                                 decoration: InputDecoration(
@@ -151,7 +156,7 @@ class _LoginState extends ConsumerState<Login> {
                                     onPressed: () => emailCtlr.clear(),
                                     icon: const Icon(Icons.clear),
                                   ),
-                                  hintText: 'Email Address',
+                                  hintText: AppLocalizations.of(context).loginHintEmailAddress,
                                   border: InputBorder.none,
                                   contentPadding: const EdgeInsets.all(15),
                                 ),
@@ -161,7 +166,7 @@ class _LoginState extends ConsumerState<Login> {
                               height: 30,
                             ),
                             Text(
-                              'Password',
+                              AppLocalizations.of(context).commonPassword,
                               style: Theme.of(context).textTheme.titleSmall,
                             ),
                             const SizedBox(
@@ -173,7 +178,7 @@ class _LoginState extends ConsumerState<Login> {
                                 controller: passwordCtrl,
                                 obscureText: _obsecureText,
                                 validator: (value) {
-                                  if (value!.isEmpty) return 'Password is required';
+                                  if (value!.isEmpty) return AppLocalizations.of(context).validationPasswordRequired;
                                   return null;
                                 },
                                 decoration: InputDecoration(
@@ -183,7 +188,7 @@ class _LoginState extends ConsumerState<Login> {
                                         IconButton(onPressed: () => passwordCtrl.clear(), icon: const Icon(Icons.clear)),
                                       ],
                                     ),
-                                    hintText: 'Your Password',
+                                    hintText: AppLocalizations.of(context).loginHintPassword,
                                     border: InputBorder.none,
                                     contentPadding: const EdgeInsets.all(15)),
                               ),
@@ -201,7 +206,7 @@ class _LoginState extends ConsumerState<Login> {
                               animateOnTap: false,
                               elevation: 0,
                               child: Text(
-                                'Login',
+                                AppLocalizations.of(context).commonLogin,
                                 style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white),
                               ),
                             ),

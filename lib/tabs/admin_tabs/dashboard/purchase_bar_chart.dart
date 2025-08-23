@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:lms_admin/models/chart_model.dart';
 import 'package:lms_admin/services/firebase_service.dart';
+import 'package:lms_admin/l10n/app_localizations.dart';
 import 'empty_bar_chart.dart';
 
 final purchaseStatsProvider = FutureProvider<List<ChartModel>>((ref) async {
@@ -35,16 +36,16 @@ class PurchaseBarChart extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(LineIcons.areaChart),
-                SizedBox(
+                const Icon(LineIcons.areaChart),
+                const SizedBox(
                   width: 20,
                 ),
                 Text(
-                  'Subscription Purchases',
-                  style: TextStyle(
+                  AppLocalizations.of(context).chartSubscriptionPurchasesTitle,
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                   ),
@@ -77,7 +78,10 @@ class PurchaseBarChart extends ConsumerWidget {
                 indicatorPadding: const EdgeInsets.all(8),
                 tabAlignment: TabAlignment.center,
                 labelPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 30),
-                tabs: const [Tab(child: Text('Last 7 Days')), Tab(child: Text('Last 30 Days'))],
+                tabs: [
+                  Tab(child: Text(AppLocalizations.of(context).chartLast7Days)),
+                  Tab(child: Text(AppLocalizations.of(context).chartLast30Days))
+                ],
               ),
             ),
             const SizedBox(height: 20),
@@ -134,7 +138,7 @@ class PurchaseBarChart extends ConsumerWidget {
         final ChartModel model = purchaseStats[groupIndex];
         final String formattedDate = DateFormat('dd/MM/yyyy').format(model.timestamp);
 
-        return BarTooltipItem('${rod.toY} Purchases', const TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 16), children: [
+        return BarTooltipItem(AppLocalizations.of(context).chartPurchasesTooltip(rod.toY.toInt()), const TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 16), children: [
           const TextSpan(text: '\n'),
           TextSpan(text: formattedDate, style: TextStyle(fontSize: 12, color: Colors.grey.shade400)),
         ]);

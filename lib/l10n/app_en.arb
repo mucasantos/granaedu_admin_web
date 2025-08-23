@@ -1,0 +1,169 @@
+{
+  "appTitle": "Admin Panel",
+
+  "loginSignInTitle": "Sign In to the Admin Panel",
+  "commonEmail": "Email",
+  "commonPassword": "Password",
+  "commonLogin": "Login",
+  "loginHintEmailAddress": "Email Address",
+  "loginHintPassword": "Your Password",
+  "validationEmailRequired": "Email is required",
+  "validationPasswordRequired": "Password is required",
+  "authInvalidCredentials": "Email/Password is invalid",
+  "authAccessDenied": "Access Denied",
+
+  "verifyTitle": "Verify Your Purchase",
+  "verifyWhereCode": "Where is Your Purchase Code?",
+  "verifyCheck": "Check",
+  "verifyFieldLabel": "Purchase Code",
+  "verifyHint": "Your Purchase Code",
+  "verifyRequired": "Purchase code is required",
+  "verifyButton": "Verify",
+
+  "notificationsPreviewTitle": "Notification Preview"
+  ,
+  "commonOk": "Okay",
+  "commonNo": "No",
+  "dialogYesDelete": "Yes, Delete",
+
+  "accountCreated": "Account Created: {date}",
+  "@accountCreated": {
+    "placeholders": {
+      "date": { "type": "String", "description": "Localized date of account creation" }
+    }
+  },
+
+  "subscriptionLabel": "Subscription: ",
+
+  "enrolledCoursesTitle": "Enrolled Courses ({count})",
+  "@enrolledCoursesTitle": {
+    "placeholders": {
+      "count": { "type": "int", "description": "Number of enrolled courses" }
+    }
+  },
+
+  "noCoursesFound": "No courses found",
+
+  "wishlistTitle": "Wishlist ({count})",
+  "@wishlistTitle": {
+    "placeholders": {
+      "count": { "type": "int", "description": "Number of wishlisted courses" }
+    }
+  },
+
+  "byAuthor": "By {author}",
+  "@byAuthor": {
+    "placeholders": {
+      "author": { "type": "String", "description": "Author name" }
+    }
+  },
+
+  "percentCompleted": "{percent}% completed",
+  "@percentCompleted": {
+    "placeholders": {
+      "percent": { "type": "int", "description": "Percent completed (0-100)" }
+    }
+  }
+
+  ,
+  "questionsTitle": "Questions *",
+  "addQuestion": "Add Question",
+  "noQuestionsFound": "No questions found",
+  "questionIndexTitle": "Q{number}. {title}",
+  "@questionIndexTitle": {
+    "placeholders": {
+      "number": { "type": "int", "description": "Question index starting at 1" },
+      "title": { "type": "String", "description": "Question title" }
+    }
+  },
+  "correctAnswer": "Correct Answer: {answer}",
+  "@correctAnswer": {
+    "placeholders": {
+      "answer": { "type": "String", "description": "Correct answer label" }
+    }
+  }
+
+  ,
+  "quizAddQuestion": "Add Question",
+  "quizUpdateQuestion": "Update Question",
+  "quizEnterQuestionTitle": "Enter Question Title",
+  "quizQuestionTitleLabel": "Question Title *",
+  "quizOptionsType": "Options Type",
+  "quizOptionTypeFour": "Four Options",
+  "quizOptionTypeTwo": "Two Options",
+  "quizOptionA": "Option A",
+  "quizOptionB": "Option B",
+  "quizOptionC": "Option C",
+  "quizOptionD": "Option D",
+  "quizSelectCorrectAnswer": "Select Correct Answer",
+  "quizValueIsRequired": "Value is required"
+
+  ,
+  "commonCancel": "Cancel",
+  "commonAdd": "Add",
+  "editorYoutubeUrlTitle": "Youtube Video Url",
+  "editorImageUrlTitle": "Image URL",
+  "editorNetworkVideoUrlTitle": "Network Video Url",
+  "editorUrlLabel": "URL",
+  "editorEnterYoutubeUrlHint": "Enter Youtube video Url",
+  "editorEnterImageUrlHint": "Enter Image Url",
+  "editorEnterVideoUrlHint": "Enter Video URL",
+  "validationValueEmpty": "Value is empty",
+  "validationInvalidVideoId": "Invalid video ID",
+  "validationInvalidUrl": "Invalid URL"
+  ,
+  "editorInsertUrlTitle": "Insert URL",
+  "editorInsertImageUrlTitle": "Insert Image URL",
+  "editorInsertVideoUrlTitle": "Insert Video URL",
+  "editorDisplayTextLabel": "Display Text",
+  "editorTextToDisplayHint": "Text to Display",
+  "editorEnterUrlHint": "Enter URL",
+  "editorEnterDescriptionPlaceholder": "Enter Description",
+  "tooltipInsertLink": "Insert Link",
+  "tooltipInsertImage": "Image",
+  "tooltipInsertVideo": "Insert Video Link",
+  "tooltipClearAll": "Clear All"
+
+  ,
+  "commonViewAll": "View All",
+  "dashboardLatestReviews": "Latest Reviews",
+  "dashboardNewUsers": "New Users",
+  "dashboardLatestPurchases": "Latest Purchases",
+  "dashboardTopCourses": "Top Courses",
+  "dashboardEnrolledCourses": "Enrolled Courses: {count}",
+  "@dashboardEnrolledCourses": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "dashboardStudentsCount": "{count} students",
+  "@dashboardStudentsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "chartLast7Days": "Last 7 Days",
+  "chartLast30Days": "Last 30 Days",
+  "chartSubscriptionPurchasesTitle": "Subscription Purchases",
+  "chartPurchasesTooltip": "{count} Purchases",
+  "@chartPurchasesTooltip": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "chartNewUserRegistrationTitle": "News User Registration",
+  "chartUsersTooltip": "{count} Users",
+  "@chartUsersTooltip": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "authorTotalStudents": "Total Students",
+  "authorTotalCourses": "Total Courses",
+  "authorTotalReviews": "Total Reviews"
+  ,
+  "priceStatusFree": "Free",
+  "priceStatusPremium": "Premium"
+}

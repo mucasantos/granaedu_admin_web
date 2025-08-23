@@ -6,6 +6,7 @@ import 'package:lms_admin/models/notification_model.dart';
 import 'package:lms_admin/components/custom_buttons.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:rounded_loading_button_plus/rounded_loading_button.dart';
+import 'package:lms_admin/l10n/app_localizations.dart';
 
 class CustomDialogs {
   static openInfoDialog(context, title, message) {
@@ -26,7 +27,7 @@ class CustomDialogs {
                 const SizedBox(
                   height: 30,
                 ),
-                Center(child: CustomButtons.normalButton(context, text: 'Okay'))
+                Center(child: CustomButtons.normalButton(context, text: AppLocalizations.of(context).commonOk))
               ],
             ),
           );
@@ -63,7 +64,7 @@ class CustomDialogs {
                   CustomButtons.submitButton(context,
                       buttonController: actionBtnController,
                       bgColor: Colors.redAccent,
-                      text: actionButtonText,
+                      text: actionButtonText == 'Yes, Delete' ? AppLocalizations.of(context).dialogYesDelete : actionButtonText,
                       width: 200,
                       onPressed: onAction,
                       borderRadius: 25),
@@ -71,7 +72,7 @@ class CustomDialogs {
                   CustomButtons.submitButton(
                     context,
                     buttonController: RoundedLoadingButtonController(),
-                    text: 'No',
+                    text: AppLocalizations.of(context).commonNo,
                     width: 100,
                     borderRadius: 25,
                     onPressed: () => Navigator.pop(context),
@@ -139,7 +140,7 @@ class CustomDialogs {
               appBar: AppBar(
                 backgroundColor: Colors.white,
                 elevation: 0.5,
-                title: Text('Notification Preview', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.black)),
+                title: Text(AppLocalizations.of(context).notificationsPreviewTitle, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.black)),
                 automaticallyImplyLeading: false,
                 actions: [
                   IconButton(

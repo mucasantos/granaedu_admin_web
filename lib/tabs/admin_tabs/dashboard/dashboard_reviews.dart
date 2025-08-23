@@ -4,6 +4,7 @@ import 'package:lms_admin/components/side_menu.dart';
 import 'package:lms_admin/mixins/user_mixin.dart';
 import 'package:lms_admin/models/review.dart';
 import 'package:lms_admin/services/firebase_service.dart';
+import 'package:lms_admin/l10n/app_localizations.dart';
 
 import '../../../components/rating_view.dart';
 import '../../../pages/home.dart';
@@ -33,7 +34,7 @@ class DashboardReviews extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Latest Reviews',
+                AppLocalizations.of(context).dashboardLatestReviews,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               TextButton(
@@ -41,7 +42,7 @@ class DashboardReviews extends ConsumerWidget {
                     ref.read(menuIndexProvider.notifier).update((state) => 5);
                     ref.read(pageControllerProvider.notifier).state.jumpToPage(5);
                   },
-                  child: const Text('View All'))
+                  child: Text(AppLocalizations.of(context).commonViewAll))
             ],
           ),
           Padding(

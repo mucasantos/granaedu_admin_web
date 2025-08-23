@@ -4,6 +4,7 @@ import 'package:html_editor_enhanced/html_editor.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'package:youtube_parser/youtube_parser.dart';
+import 'package:lms_admin/l10n/app_localizations.dart';
 
 /*
   CURRENT ISSUES:
@@ -144,7 +145,7 @@ class _CustomHtmlEditorState extends State<CustomHtmlEditor> {
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    child: const Text('Cancel')),
+                    child: Text(AppLocalizations.of(context).commonCancel)),
                 TextButton(
                   onPressed: () {
                     if (formKey.currentState!.validate()) {
@@ -155,10 +156,10 @@ class _CustomHtmlEditorState extends State<CustomHtmlEditor> {
                       Navigator.pop(context);
                     }
                   },
-                  child: const Text('Add'),
+                  child: Text(AppLocalizations.of(context).commonAdd),
                 ),
               ],
-              title: const Text('Youtube Video Url'),
+              title: Text(AppLocalizations.of(context).editorYoutubeUrlTitle),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,17 +169,17 @@ class _CustomHtmlEditorState extends State<CustomHtmlEditor> {
                     child: TextFormField(
                       controller: youtubeCtlr,
                       decoration: InputDecoration(
-                        hintText: 'Enter Youtube video Url',
-                        label: const Text('URL'),
+                        hintText: AppLocalizations.of(context).editorEnterYoutubeUrlHint,
+                        label: Text(AppLocalizations.of(context).editorUrlLabel),
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.clear),
                           onPressed: () => youtubeCtlr.clear(),
                         ),
                       ),
                       validator: ((value) {
-                        if (value!.isEmpty) return 'Value is empty';
+                        if (value!.isEmpty) return AppLocalizations.of(context).validationValueEmpty;
                         String? videoId = getIdFromUrl(youtubeCtlr.text);
-                        if (videoId == null) return "Invalid video ID";
+                        if (videoId == null) return AppLocalizations.of(context).validationInvalidVideoId;
                         return null;
                       }),
                     ),
@@ -203,7 +204,7 @@ class _CustomHtmlEditorState extends State<CustomHtmlEditor> {
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    child: const Text('Cancel')),
+                    child: Text(AppLocalizations.of(context).commonCancel)),
                 TextButton(
                     onPressed: () {
                       if (formKey.currentState!.validate()) {
@@ -212,9 +213,9 @@ class _CustomHtmlEditorState extends State<CustomHtmlEditor> {
                         Navigator.pop(context);
                       }
                     },
-                    child: const Text('Add')),
+                    child: Text(AppLocalizations.of(context).commonAdd)),
               ],
-              title: const Text('Image URL'),
+              title: Text(AppLocalizations.of(context).editorImageUrlTitle),
               content: Form(
                 key: formKey,
                 child: Column(
@@ -224,17 +225,17 @@ class _CustomHtmlEditorState extends State<CustomHtmlEditor> {
                     TextFormField(
                       controller: imageCtlr,
                       decoration: InputDecoration(
-                        hintText: 'Enter Image Url',
-                        label: const Text('URL'),
+                        hintText: AppLocalizations.of(context).editorEnterImageUrlHint,
+                        label: Text(AppLocalizations.of(context).editorUrlLabel),
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.clear),
                           onPressed: () => imageCtlr.clear(),
                         ),
                       ),
                       validator: ((value) {
-                        if (value!.isEmpty) return 'Value is empty';
+                        if (value!.isEmpty) return AppLocalizations.of(context).validationValueEmpty;
                         bool validURL = Uri.parse(value).isAbsolute;
-                        if (!validURL) return "Invalid URL";
+                        if (!validURL) return AppLocalizations.of(context).validationInvalidUrl;
                         return null;
                       }),
                     )
@@ -259,7 +260,7 @@ class _CustomHtmlEditorState extends State<CustomHtmlEditor> {
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    child: const Text('Cancel')),
+                    child: Text(AppLocalizations.of(context).commonCancel)),
                 TextButton(
                     onPressed: () {
                       if (formKey.currentState!.validate()) {
@@ -268,9 +269,9 @@ class _CustomHtmlEditorState extends State<CustomHtmlEditor> {
                         Navigator.pop(context);
                       }
                     },
-                    child: const Text('Add')),
+                    child: Text(AppLocalizations.of(context).commonAdd)),
               ],
-              title: const Text('Network Video Url'),
+              title: Text(AppLocalizations.of(context).editorNetworkVideoUrlTitle),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,8 +280,8 @@ class _CustomHtmlEditorState extends State<CustomHtmlEditor> {
                     key: formKey,
                     child: TextFormField(
                       decoration: InputDecoration(
-                        hintText: 'Enter Video URL',
-                        label: const Text('URL'),
+                        hintText: AppLocalizations.of(context).editorEnterVideoUrlHint,
+                        label: Text(AppLocalizations.of(context).editorUrlLabel),
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.clear),
                           onPressed: () => videoCtlr.clear(),
@@ -288,9 +289,9 @@ class _CustomHtmlEditorState extends State<CustomHtmlEditor> {
                       ),
                       controller: videoCtlr,
                       validator: ((value) {
-                        if (value!.isEmpty) return 'Value is empty';
+                        if (value!.isEmpty) return AppLocalizations.of(context).validationValueEmpty;
                         bool validURL = Uri.parse(value).isAbsolute;
-                        if (!validURL) return "Invalid URL";
+                        if (!validURL) return AppLocalizations.of(context).validationInvalidUrl;
                         return null;
                       }),
                     ),

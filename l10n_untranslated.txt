@@ -1,0 +1,15 @@
+{
+  "pt": [
+    "editorInsertUrlTitle",
+    "editorInsertImageUrlTitle",
+    "editorInsertVideoUrlTitle",
+    "editorDisplayTextLabel",
+    "editorTextToDisplayHint",
+    "editorEnterUrlHint",
+    "editorEnterDescriptionPlaceholder",
+    "tooltipInsertLink",
+    "tooltipInsertImage",
+    "tooltipInsertVideo",
+    "tooltipClearAll"
+  ]
+}

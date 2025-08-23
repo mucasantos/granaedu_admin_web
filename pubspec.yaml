@@ -12,6 +12,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   flutter_web_plugins:
     sdk: flutter
@@ -71,4 +73,6 @@ flutter:
           weight: 700
         - asset: assets/google_fonts/Poppins-ExtraBold.ttf
           weight: 800
+
+  generate: true
 

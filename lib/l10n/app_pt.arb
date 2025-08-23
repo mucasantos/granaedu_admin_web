@@ -1,0 +1,156 @@
+{
+  "appTitle": "Painel Administrativo",
+
+  "loginSignInTitle": "Entrar no Painel Administrativo",
+  "commonEmail": "E-mail",
+  "commonPassword": "Senha",
+  "commonLogin": "Entrar",
+  "loginHintEmailAddress": "Endereço de e-mail",
+  "loginHintPassword": "Sua senha",
+  "validationEmailRequired": "E-mail é obrigatório",
+  "validationPasswordRequired": "Senha é obrigatória",
+  "authInvalidCredentials": "E-mail/Senha inválidos",
+  "authAccessDenied": "Acesso negado",
+
+  "verifyTitle": "Verifique sua compra",
+  "verifyWhereCode": "Onde está o seu código de compra?",
+  "verifyCheck": "Verificar",
+  "verifyFieldLabel": "Código de compra",
+  "verifyHint": "Seu código de compra",
+  "verifyRequired": "O código de compra é obrigatório",
+  "verifyButton": "Verificar",
+
+  "notificationsPreviewTitle": "Prévia da notificação",
+  "commonOk": "Ok",
+  "commonNo": "Não",
+  "dialogYesDelete": "Sim, Excluir",
+
+  "accountCreated": "Conta criada: {date}",
+  "@accountCreated": {
+    "placeholders": {
+      "date": { "type": "String", "description": "Data de criação da conta" }
+    }
+  },
+
+  "subscriptionLabel": "Assinatura: ",
+
+  "enrolledCoursesTitle": "Cursos matriculados ({count})",
+  "@enrolledCoursesTitle": {
+    "placeholders": {
+      "count": { "type": "int", "description": "Número de cursos matriculados" }
+    }
+  },
+
+  "noCoursesFound": "Nenhum curso encontrado",
+
+  "wishlistTitle": "Lista de desejos ({count})",
+  "@wishlistTitle": {
+    "placeholders": {
+      "count": { "type": "int", "description": "Número de cursos na lista de desejos" }
+    }
+  },
+
+  "byAuthor": "Por {author}",
+  "@byAuthor": {
+    "placeholders": {
+      "author": { "type": "String", "description": "Nome do autor" }
+    }
+  },
+
+  "percentCompleted": "{percent}% concluído",
+  "@percentCompleted": {
+    "placeholders": {
+      "percent": { "type": "int", "description": "Percentual concluído (0-100)" }
+    }
+  }
+
+  ,
+  "questionsTitle": "Perguntas *",
+  "addQuestion": "Adicionar Pergunta",
+  "noQuestionsFound": "Nenhuma pergunta encontrada",
+  "questionIndexTitle": "P{number}. {title}",
+  "@questionIndexTitle": {
+    "placeholders": {
+      "number": { "type": "int", "description": "Índice da pergunta iniciando em 1" },
+      "title": { "type": "String", "description": "Título da pergunta" }
+    }
+  },
+  "correctAnswer": "Resposta correta: {answer}",
+  "@correctAnswer": {
+    "placeholders": {
+      "answer": { "type": "String", "description": "Texto da alternativa correta" }
+    }
+  }
+
+  ,
+  "quizAddQuestion": "Adicionar Pergunta",
+  "quizUpdateQuestion": "Atualizar Pergunta",
+  "quizEnterQuestionTitle": "Digite o título da pergunta",
+  "quizQuestionTitleLabel": "Título da Pergunta *",
+  "quizOptionsType": "Tipo de opções",
+  "quizOptionTypeFour": "Quatro opções",
+  "quizOptionTypeTwo": "Duas opções",
+  "quizOptionA": "Opção A",
+  "quizOptionB": "Opção B",
+  "quizOptionC": "Opção C",
+  "quizOptionD": "Opção D",
+  "quizSelectCorrectAnswer": "Selecione a resposta correta",
+  "quizValueIsRequired": "Valor obrigatório"
+
+  ,
+  "commonCancel": "Cancelar",
+  "commonAdd": "Adicionar",
+  "editorYoutubeUrlTitle": "URL do vídeo do YouTube",
+  "editorImageUrlTitle": "URL da imagem",
+  "editorNetworkVideoUrlTitle": "URL do vídeo (rede)",
+  "editorUrlLabel": "URL",
+  "editorEnterYoutubeUrlHint": "Digite a URL do vídeo do YouTube",
+  "editorEnterImageUrlHint": "Digite a URL da imagem",
+  "editorEnterVideoUrlHint": "Digite a URL do vídeo",
+  "validationValueEmpty": "Valor vazio",
+  "validationInvalidVideoId": "ID de vídeo inválido",
+  "validationInvalidUrl": "URL inválida"
+
+  ,
+  "commonViewAll": "Ver todos",
+  "dashboardLatestReviews": "Avaliações recentes",
+  "dashboardNewUsers": "Novos usuários",
+  "dashboardLatestPurchases": "Compras recentes",
+  "dashboardTopCourses": "Cursos em destaque",
+  "dashboardEnrolledCourses": "Cursos matriculados: {count}",
+  "@dashboardEnrolledCourses": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "dashboardStudentsCount": "{count} alunos",
+  "@dashboardStudentsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "chartLast7Days": "Últimos 7 dias",
+  "chartLast30Days": "Últimos 30 dias",
+  "chartSubscriptionPurchasesTitle": "Assinaturas compradas",
+  "chartPurchasesTooltip": "{count} compras",
+  "@chartPurchasesTooltip": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "chartNewUserRegistrationTitle": "Novos cadastros de usuários",
+  "chartUsersTooltip": "{count} usuários",
+  "@chartUsersTooltip": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "authorTotalStudents": "Total de alunos",
+  "authorTotalCourses": "Total de cursos",
+  "authorTotalReviews": "Total de avaliações"
+  ,
+  "priceStatusFree": "Gratuito",
+  "priceStatusPremium": "Premium"
+}

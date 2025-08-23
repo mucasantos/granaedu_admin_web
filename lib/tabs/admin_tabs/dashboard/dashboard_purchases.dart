@@ -4,6 +4,7 @@ import 'package:lms_admin/components/side_menu.dart';
 import 'package:lms_admin/mixins/user_mixin.dart';
 import 'package:lms_admin/models/purchase_history.dart';
 import 'package:lms_admin/services/firebase_service.dart';
+import 'package:lms_admin/l10n/app_localizations.dart';
 
 import '../../../pages/home.dart';
 
@@ -32,7 +33,7 @@ class DashboardPurchases extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Latest Purchases',
+                AppLocalizations.of(context).dashboardLatestPurchases,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               TextButton(
@@ -40,7 +41,7 @@ class DashboardPurchases extends ConsumerWidget {
                     ref.read(menuIndexProvider.notifier).update((state) => 8);
                     ref.read(pageControllerProvider.notifier).state.jumpToPage(8);
                   },
-                  child: const Text('View All'))
+                  child: Text(AppLocalizations.of(context).commonViewAll))
             ],
           ),
           Padding(

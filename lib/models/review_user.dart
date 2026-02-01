@@ -7,14 +7,10 @@ class ReviewUser {
   ReviewUser({required this.id, required this.name, this.imageUrl});
 
   factory ReviewUser.fromFirebase(Map<String, dynamic> d) {
-    final String id = d['id'] == null ? '' : d['id'].toString();
-    final String name = d['name'] == null ? '' : d['name'].toString();
-    final String? imageUrl = d['image_url'] == null ? null : d['image_url'].toString();
-
     return ReviewUser(
-      id: id,
-      name: name,
-      imageUrl: imageUrl,
+      id: d['id'],
+      name: d['name'],
+      imageUrl: d['image_url'],
     );
   }
 

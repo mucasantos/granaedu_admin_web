@@ -614,6 +614,84 @@ abstract class AppLocalizations {
   /// **'Total Reviews'**
   String get authorTotalReviews;
 
+  /// No description provided for @dashboardTotalUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Users'**
+  String get dashboardTotalUsers;
+
+  /// No description provided for @dashboardTotalEnrolled.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Enrolled'**
+  String get dashboardTotalEnrolled;
+
+  /// No description provided for @dashboardTotalSubscribed.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Subscribed'**
+  String get dashboardTotalSubscribed;
+
+  /// No description provided for @dashboardTotalPurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Purchases'**
+  String get dashboardTotalPurchases;
+
+  /// No description provided for @dashboardTotalAuthors.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Authors'**
+  String get dashboardTotalAuthors;
+
+  /// No description provided for @dashboardTotalCourses.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Courses'**
+  String get dashboardTotalCourses;
+
+  /// No description provided for @dashboardTotalNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Notifications'**
+  String get dashboardTotalNotifications;
+
+  /// No description provided for @dashboardTotalReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Reviews'**
+  String get dashboardTotalReviews;
+
+  /// No description provided for @dashboardTotalXP.
+  ///
+  /// In en, this message translates to:
+  /// **'Total XP'**
+  String get dashboardTotalXP;
+
+  /// No description provided for @dashboardAvgStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Streak'**
+  String get dashboardAvgStreak;
+
+  /// No description provided for @dashboardActiveToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Today'**
+  String get dashboardActiveToday;
+
+  /// No description provided for @dashboardStudentsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Students Summary'**
+  String get dashboardStudentsSummary;
+
+  /// No description provided for @dashboardCoursesSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Courses Summary'**
+  String get dashboardCoursesSummary;
+
   /// No description provided for @priceStatusFree.
   ///
   /// In en, this message translates to:

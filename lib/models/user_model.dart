@@ -16,6 +16,8 @@ class UserModel {
   Subscription? subscription;
   List? completedLessons;
   String? platform;
+  final int? xp, streak;
+  final DateTime? lastCheckIn;
 
   UserModel({
     required this.id,
@@ -32,15 +34,18 @@ class UserModel {
     this.subscription,
     this.completedLessons,
     this.platform,
+    this.xp,
+    this.streak,
+    this.lastCheckIn,
   });
 
   factory UserModel.fromFirebase(DocumentSnapshot snap) {
-    final Map<String, dynamic> d = snap.data() as Map<String, dynamic>;
+    Map d = snap.data() as Map<String, dynamic>;
     return UserModel(
       id: snap.id,
-      email: (d['email'] as String?) ?? '',
-      imageUrl: d['image_url'] as String?,
-      name: (d['name'] as String?) ?? '',
+      email: d['email'],
+      imageUrl: d['image_url'],
+      name: d['name'],
       role: d['role'] ?? [],
       isDisbaled: d['disabled'] ?? false,
       createdAt: d['created_at'] == null ? null : (d['created_at'] as Timestamp).toDate().toLocal(),
@@ -51,6 +56,11 @@ class UserModel {
       subscription: d['subscription'] == null ? null : Subscription.fromFirestore(d['subscription']),
       completedLessons: d['completed_lessons'] ?? [],
       platform: d['platform'],
+      xp: d['xp'] ?? 0,
+      streak: d['streak'] ?? 0,
+      lastCheckIn: d['last_check_in'] == null
+          ? null
+          : (d['last_check_in'] as Timestamp).toDate().toLocal(),
     );
   }
 

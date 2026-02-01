@@ -6,9 +6,8 @@ import 'package:lms_admin/mixins/textfields.dart';
 import 'package:lms_admin/models/question.dart';
 import 'package:rounded_loading_button_plus/rounded_loading_button.dart';
 import '../components/custom_buttons.dart';
-import 'package:lms_admin/l10n/app_localizations.dart';
 
-const List<String> quizOptionTypeKeys = ['four', 'two'];
+const Map<String, String> quizOptionTypes = {'four': 'Four Options', 'two': 'Two Options'};
 final questionListProvider = StateProvider<List<Question>>((ref) => []);
 
 class QuizForm extends ConsumerStatefulWidget {
@@ -30,19 +29,10 @@ class _SectionFormState extends ConsumerState<QuizForm> with TextFields {
   var option4Ctlr = TextEditingController();
   final btnCtlr = RoundedLoadingButtonController();
   int? _correctAnswerIndex;
-  String _optionType = quizOptionTypeKeys.first;
-
-  Map<String, String> _quizOptionTypes(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    // Keep insertion order stable to match key usage
-    return {
-      quizOptionTypeKeys[0]: l10n.quizOptionTypeFour,
-      quizOptionTypeKeys[1]: l10n.quizOptionTypeTwo,
-    };
-  }
+  String _optionType = quizOptionTypes.entries.first.key;
 
   List _getOptions() {
-    if (_optionType == quizOptionTypeKeys.first) {
+    if (_optionType == quizOptionTypes.keys.first) {
       return [option1Ctlr.text, option2Ctlr.text, option3Ctlr.text, option4Ctlr.text];
     } else {
       return [option1Ctlr.text, option2Ctlr.text];
@@ -83,9 +73,9 @@ class _SectionFormState extends ConsumerState<QuizForm> with TextFields {
       if (widget.question!.options.length == 4) {
         option3Ctlr.text = widget.question!.options[2];
         option4Ctlr.text = widget.question!.options[3];
-        _optionType = quizOptionTypeKeys.first;
+        _optionType = quizOptionTypes.keys.first;
       } else {
-        _optionType = quizOptionTypeKeys.last;
+        _optionType = quizOptionTypes.keys.last;
       }
     }
   }
@@ -100,9 +90,7 @@ class _SectionFormState extends ConsumerState<QuizForm> with TextFields {
           context,
           width: 300,
           buttonController: btnCtlr,
-          text: widget.question == null
-              ? AppLocalizations.of(context).quizAddQuestion
-              : AppLocalizations.of(context).quizUpdateQuestion,
+          text: widget.question == null ? 'Add Question' : 'Update Question',
           onPressed: _handleSubmit,
         ),
       ),
@@ -130,17 +118,12 @@ class _SectionFormState extends ConsumerState<QuizForm> with TextFields {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              buildTextField(
-                context,
-                controller: questionTitleCtlr,
-                hint: AppLocalizations.of(context).quizEnterQuestionTitle,
-                title: AppLocalizations.of(context).quizQuestionTitleLabel,
-              ),
+              buildTextField(context, controller: questionTitleCtlr, hint: 'Enter Question Title', title: 'Question Title *'),
               const SizedBox(height: 30),
               RadioOptions(
                 contentType: _optionType,
-                options: _quizOptionTypes(context),
-                title: AppLocalizations.of(context).quizOptionsType,
+                options: quizOptionTypes,
+                title: 'Options Type',
                 icon: Icons.light,
                 onChanged: (value) => setState(() => _optionType = value),
               ),
@@ -148,45 +131,25 @@ class _SectionFormState extends ConsumerState<QuizForm> with TextFields {
               Row(
                 children: [
                   Expanded(
-                    child: buildTextField(
-                      context,
-                      controller: option1Ctlr,
-                      hint: '',
-                      title: '${AppLocalizations.of(context).quizOptionA} *',
-                    ),
+                    child: buildTextField(context, controller: option1Ctlr, hint: '', title: 'Option A *'),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: buildTextField(
-                      context,
-                      controller: option2Ctlr,
-                      hint: '',
-                      title: '${AppLocalizations.of(context).quizOptionB} *',
-                    ),
+                    child: buildTextField(context, controller: option2Ctlr, hint: '', title: 'Option B *'),
                   )
                 ],
               ),
               const SizedBox(height: 30),
               Visibility(
-                visible: _optionType == quizOptionTypeKeys.first,
+                visible: _optionType == quizOptionTypes.keys.first,
                 child: Row(
                   children: [
                     Expanded(
-                      child: buildTextField(
-                        context,
-                        controller: option3Ctlr,
-                        hint: '',
-                        title: '${AppLocalizations.of(context).quizOptionC} *',
-                      ),
+                      child: buildTextField(context, controller: option3Ctlr, hint: '', title: 'Option C *'),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: buildTextField(
-                        context,
-                        controller: option4Ctlr,
-                        hint: '',
-                        title: '${AppLocalizations.of(context).quizOptionD} *',
-                      ),
+                      child: buildTextField(context, controller: option4Ctlr, hint: '', title: 'Option D *'),
                     )
                   ],
                 ),
@@ -205,7 +168,7 @@ class _SectionFormState extends ConsumerState<QuizForm> with TextFields {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          AppLocalizations.of(context).quizSelectCorrectAnswer,
+          'Select Correct Answer',
           style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.normal),
         ),
         const SizedBox(
@@ -217,35 +180,35 @@ class _SectionFormState extends ConsumerState<QuizForm> with TextFields {
           child: DropdownButtonFormField(
               decoration: const InputDecoration(border: InputBorder.none),
               validator: (value) {
-                if (value == null) return AppLocalizations.of(context).quizValueIsRequired;
+                if (value == null) return 'Value is required';
                 return null;
               },
               onChanged: (dynamic value) => setState(() => _correctAnswerIndex = value),
               value: _correctAnswerIndex,
-              hint: Text(AppLocalizations.of(context).quizSelectCorrectAnswer),
+              hint: const Text('Select Correct Answer'),
               items: <DropdownMenuItem>[
-                DropdownMenuItem(
+                const DropdownMenuItem(
                   value: 0,
-                  child: Text(AppLocalizations.of(context).quizOptionA),
+                  child: Text('Option A'),
                 ),
-                DropdownMenuItem(
+                const DropdownMenuItem(
                   value: 1,
-                  child: Text(AppLocalizations.of(context).quizOptionB),
+                  child: Text('Option B'),
                 ),
                 DropdownMenuItem(
-                  enabled: _optionType == quizOptionTypeKeys.first,
+                  enabled: _optionType == quizOptionTypes.keys.first,
                   value: 2,
                   child: Text(
-                    AppLocalizations.of(context).quizOptionC,
-                    style: TextStyle(color: _optionType == quizOptionTypeKeys.first ? Colors.grey[900] : Colors.grey[200]),
+                    'Option C',
+                    style: TextStyle(color: _optionType == quizOptionTypes.keys.first ? Colors.grey[900] : Colors.grey[200]),
                   ),
                 ),
                 DropdownMenuItem(
-                  enabled: _optionType == quizOptionTypeKeys.first,
+                  enabled: _optionType == quizOptionTypes.keys.first,
                   value: 3,
                   child: Text(
-                    AppLocalizations.of(context).quizOptionD,
-                    style: TextStyle(color: _optionType == quizOptionTypeKeys.first ? Colors.grey[900] : Colors.grey[200]),
+                    'Option D',
+                    style: TextStyle(color: _optionType == quizOptionTypes.keys.first ? Colors.grey[900] : Colors.grey[200]),
                   ),
                 )
               ]),

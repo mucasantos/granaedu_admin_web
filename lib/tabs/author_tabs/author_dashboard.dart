@@ -6,7 +6,6 @@ import '../../utils/reponsive.dart';
 import '../../providers/user_data_provider.dart';
 import '../../services/firebase_service.dart';
 import '../admin_tabs/dashboard/dashboard_tile.dart';
-import 'package:lms_admin/l10n/app_localizations.dart';
 
 final authorCoursesCountProvider = FutureProvider<int>((ref) async {
   final user = ref.read(userDataProvider);
@@ -45,9 +44,9 @@ class AuthorDashboard extends ConsumerWidget with CourseMixin {
                   crossAxisCount: Responsive.getCrossAxisCount(context),
                   childAspectRatio: Responsive.getChildAspectRatio(context)),
               children: [
-                DashboardTile(info: AppLocalizations.of(context).authorTotalStudents, count: user?.authorInfo?.students ?? 0, icon: LineIcons.userFriends),
-                DashboardTile(info: AppLocalizations.of(context).authorTotalCourses, count: ref.watch(authorCoursesCountProvider).value ?? 0, icon: LineIcons.book),
-                DashboardTile(info: AppLocalizations.of(context).authorTotalReviews, count: ref.watch(authorReviewsCountProvider).value ?? 0, icon: LineIcons.star),
+                DashboardTile(info: 'Total Students', count: user?.authorInfo?.students ?? 0, icon: LineIcons.userFriends),
+                DashboardTile(info: 'Total Courses', count: ref.watch(authorCoursesCountProvider).value ?? 0, icon: LineIcons.book),
+                DashboardTile(info: 'Total Reviews', count: ref.watch(authorReviewsCountProvider).value ?? 0, icon: LineIcons.star),
               ],
             ),
           ],

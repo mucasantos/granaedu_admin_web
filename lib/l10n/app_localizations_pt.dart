@@ -289,6 +289,45 @@ class AppLocalizationsPt extends AppLocalizations {
   String get authorTotalReviews => 'Total de avaliações';
 
   @override
+  String get dashboardTotalUsers => 'Total de Usuários';
+
+  @override
+  String get dashboardTotalEnrolled => 'Total Matriculados';
+
+  @override
+  String get dashboardTotalSubscribed => 'Total Assinantes';
+
+  @override
+  String get dashboardTotalPurchases => 'Total de Compras';
+
+  @override
+  String get dashboardTotalAuthors => 'Total de Autores';
+
+  @override
+  String get dashboardTotalCourses => 'Total de Cursos';
+
+  @override
+  String get dashboardTotalNotifications => 'Total de Notificações';
+
+  @override
+  String get dashboardTotalReviews => 'Total de Avaliações';
+
+  @override
+  String get dashboardTotalXP => 'Total de XP';
+
+  @override
+  String get dashboardAvgStreak => 'Média de Streak';
+
+  @override
+  String get dashboardActiveToday => 'Ativos Hoje';
+
+  @override
+  String get dashboardStudentsSummary => 'Resumo de Estudantes';
+
+  @override
+  String get dashboardCoursesSummary => 'Resumo de Cursos';
+
+  @override
   String get priceStatusFree => 'Gratuito';
 
   @override

@@ -32,6 +32,13 @@ class AppSettings extends ConsumerWidget with TextFields {
     final websiteCtlr = ref.watch(websiteTextfieldProvider);
     final supportEmailCtlr = ref.watch(supportEmailTextfieldProvider);
     final privacyCtlr = ref.watch(privacyUrlTextfieldProvider);
+    final openaiKeyCtlr = ref.watch(openaiKeyTextfieldProvider);
+    final supabaseUrlCtlr = ref.watch(supabaseUrlTextfieldProvider);
+    final supabaseKeyCtlr = ref.watch(supabaseKeyTextfieldProvider);
+    final elevenlabsKeyCtlr = ref.watch(elevenlabsKeyTextfieldProvider);
+    final weeklyPlanPromptCtlr = ref.watch(weeklyPlanPromptTextfieldProvider);
+    final grammarPromptCtlr = ref.watch(grammarPromptTextfieldProvider);
+    final chatSystemPromptCtlr = ref.watch(chatSystemPromptTextfieldProvider);
 
     final selectedCategoryId1 = ref.watch(selectedHomeCategoryId1Provider);
     final selectedCategoryId2 = ref.watch(selectedHomeCategoryId2Provider);
@@ -90,6 +97,13 @@ class AppSettings extends ConsumerWidget with TextFields {
                   homeCategory3: category3,
                   social: social,
                   latestCourses: isLatestCoursesEnabled,
+                  openaiKey: openaiKeyCtlr.text,
+                  supabaseUrl: supabaseUrlCtlr.text,
+                  supabaseKey: supabaseKeyCtlr.text,
+                  elevenlabsKey: elevenlabsKeyCtlr.text,
+                  weeklyPlanPrompt: weeklyPlanPromptCtlr.text,
+                  grammarPrompt: grammarPromptCtlr.text,
+                  chatSystemPrompt: chatSystemPromptCtlr.text,
                 );
 
                 final data = AppSettingsModel.getMap(appSettingsModel);
@@ -251,7 +265,17 @@ class AppSettings extends ConsumerWidget with TextFields {
                                 deafultValue: contentSecurityEnabled,
                                 title: 'Content Security (Disable screenshots and screen recording)',
                                 onChanged: (value) {
-                                  ref.read(isContentSecurityEnabledProvider.notifier).update((state) => value);
+                                  final license = settings.value?.license ??
+                                      LicenseType.none;
+                                  if (license == LicenseType.extended) {
+                                    ref
+                                        .read(isContentSecurityEnabledProvider
+                                            .notifier)
+                                        .update((state) => value);
+                                  } else {
+                                    openFailureToast(context,
+                                        'Extended license is required to enable this feature');
+                                  }
                                 },
                               ),
                             ],
@@ -342,6 +366,135 @@ class AppSettings extends ConsumerWidget with TextFields {
                                     title: 'Instagram',
                                     hasImageUpload: false,
                                     validationRequired: false),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(30),
+                          margin: const EdgeInsets.symmetric(vertical: 20),
+                          decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300)),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'API Keys & External Services',
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                              const Divider(),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 20),
+                                child: buildTextField(
+                                  context,
+                                  controller: openaiKeyCtlr,
+                                  hint: 'sk-xxxxxxxxxxxxxxxxxxxx',
+                                  title: 'OpenAI API Key',
+                                  hasImageUpload: false,
+                                  validationRequired: false,
+                                  isPassword: true,
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 20),
+                                child: buildTextField(
+                                  context,
+                                  controller: supabaseUrlCtlr,
+                                  hint: 'https://xxxxxxxx.supabase.co',
+                                  title: 'Supabase URL',
+                                  hasImageUpload: false,
+                                  validationRequired: false,
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 20),
+                                child: buildTextField(
+                                  context,
+                                  controller: supabaseKeyCtlr,
+                                  hint:
+                                      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+                                  title: 'Supabase Anon Key',
+                                  hasImageUpload: false,
+                                  validationRequired: false,
+                                  isPassword: true,
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 20),
+                                child: buildTextField(
+                                  context,
+                                  controller: elevenlabsKeyCtlr,
+                                  hint: 'xxxxxxxxxxxxxxxxxxxxxxxx',
+                                  title: 'ElevenLabs API Key',
+                                  hasImageUpload: false,
+                                  validationRequired: false,
+                                  isPassword: true,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(30),
+                          margin: const EdgeInsets.symmetric(vertical: 20),
+                          decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300)),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'AI Prompt Configuration',
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                              const Divider(),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 20),
+                                child: buildTextField(
+                                  context,
+                                  controller: weeklyPlanPromptCtlr,
+                                  hint:
+                                      'System instruction for Weekly Plan generation...',
+                                  title: 'Weekly Plan Prompt',
+                                  hasImageUpload: false,
+                                  validationRequired: false,
+                                  maxLines: 15,
+                                  minLines: 5,
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 20),
+                                child: buildTextField(
+                                  context,
+                                  controller: grammarPromptCtlr,
+                                  hint:
+                                      'System instruction for Grammar assistance...',
+                                  title: 'Grammar Prompt',
+                                  hasImageUpload: false,
+                                  validationRequired: false,
+                                  maxLines: 10,
+                                  minLines: 3,
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 20),
+                                child: buildTextField(
+                                  context,
+                                  controller: chatSystemPromptCtlr,
+                                  hint:
+                                      'General system instruction for AI Chat...',
+                                  title: 'Chat System Prompt',
+                                  hasImageUpload: false,
+                                  validationRequired: false,
+                                  maxLines: 10,
+                                  minLines: 3,
+                                ),
                               ),
                             ],
                           ),

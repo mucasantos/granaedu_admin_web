@@ -2,12 +2,20 @@ import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
 
 class DashboardTile extends StatelessWidget {
-  const DashboardTile({Key? key, required this.info, required this.count, required this.icon, this.bgColor}) : super(key: key);
+  const DashboardTile(
+      {Key? key,
+      required this.info,
+      required this.count,
+      required this.icon,
+      this.bgColor,
+      this.fractionDigits = 0})
+      : super(key: key);
 
   final String info;
-  final int count;
+  final num count;
   final IconData icon;
   final Color?  bgColor;
+  final int fractionDigits;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +37,7 @@ class DashboardTile extends StatelessWidget {
               AnimatedFlipCounter(
                 duration: const Duration(milliseconds: 500),
                 value: count,
+                fractionDigits: fractionDigits,
                 thousandSeparator: ',',
                 textStyle: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w600, color: Colors.black, fontSize: 28),
               )

@@ -17,7 +17,7 @@ const Map<int, List<dynamic>> menuList = {
   8: ['Purchases', LineIcons.receipt],
   9: ['Ads', LineIcons.dollarSign],
   10: ['Settings', CupertinoIcons.settings],
- };
+};
 
 const Map<int, List<dynamic>> menuListAuthor = {
   0: ['Dashboard', LineIcons.pieChart],

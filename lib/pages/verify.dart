@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lms_admin/models/app_settings_model.dart';
 import 'package:lms_admin/services/app_service.dart';
+import 'package:lms_admin/tabs/admin_tabs/app_settings/app_setting_providers.dart';
 import 'package:lms_admin/utils/reponsive.dart';
 import 'package:lms_admin/pages/home.dart';
+import 'package:lms_admin/services/api_service.dart';
 import 'package:lms_admin/utils/next_screen.dart';
+import 'package:lms_admin/utils/toasts.dart';
 import 'package:rounded_loading_button_plus/rounded_loading_button.dart';
 import 'package:svg_flutter/svg.dart';
 import '../configs/assets_config.dart';
-import 'package:lms_admin/l10n/app_localizations.dart';
+import '../providers/user_data_provider.dart';
+import '../services/firebase_service.dart';
 
 class VerifyInfo extends ConsumerStatefulWidget {
   const VerifyInfo({Key? key}) : super(key: key);
@@ -30,10 +35,24 @@ class _VerifyInfoState extends ConsumerState<VerifyInfo> {
 
   _checkVerification() async {
     _btnCtlr.start();
-    _btnCtlr.success();
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (!mounted) return;
-    NextScreen.replaceAnimation(context, const Home());
+    final LicenseType licenseType = await APIService().verifyPurchaseCode(textFieldCtlr.text);
+    final bool isVerified = licenseType != LicenseType.none;
+
+    if (isVerified) {
+      final AppSettingsModel settingsModel = AppSettingsModel(license: licenseType);
+      final Map<String, dynamic> data = AppSettingsModel.getMapLicense(settingsModel);
+
+      await FirebaseService().updateAppSettings(data);
+      ref.invalidate(appSettingsProvider);
+      await ref.read(userDataProvider.notifier).getData();
+
+      _btnCtlr.success();
+      await Future.delayed(const Duration(milliseconds: 500)).then((value) => NextScreen.replaceAnimation(context, const Home()));
+    } else {
+      _btnCtlr.reset();
+      if (!mounted) return;
+      openFailureToast(context, 'Invalid Purchase Code. Try again!');
+    }
   }
 
   @override
@@ -42,7 +61,7 @@ class _VerifyInfoState extends ConsumerState<VerifyInfo> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        color: Colors.indigo.withValues(alpha: 0.1),
+        color: Colors.indigo.withOpacity(0.1),
         child: Row(
           children: [
             Visibility(
@@ -80,7 +99,7 @@ class _VerifyInfoState extends ConsumerState<VerifyInfo> {
                         height: 20,
                       ),
                       Text(
-                        AppLocalizations.of(context).verifyTitle,
+                        'Verify Your Purchase',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
                       ),
@@ -90,16 +109,16 @@ class _VerifyInfoState extends ConsumerState<VerifyInfo> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(AppLocalizations.of(context).verifyWhereCode, style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.blueGrey)),
+                          Text('Where is Your Purchase Code?', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.blueGrey)),
                           const SizedBox(
                             width: 10,
                           ),
                           InkWell(
                             onTap: () => AppService()
                                 .openLink(context, 'https://help.market.envato.com/hc/en-us/articles/202822600-Where-Is-My-Purchase-Code-'),
-                            child: Text(
-                              AppLocalizations.of(context).verifyCheck,
-                              style: const TextStyle(color: Colors.blue, fontSize: 15, fontWeight: FontWeight.w500, decoration: TextDecoration.underline),
+                            child: const Text(
+                              'Check',
+                              style: TextStyle(color: Colors.blue, fontSize: 15, fontWeight: FontWeight.w500, decoration: TextDecoration.underline),
                             ),
                           ),
                         ],
@@ -111,7 +130,7 @@ class _VerifyInfoState extends ConsumerState<VerifyInfo> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            AppLocalizations.of(context).verifyFieldLabel,
+                            'Purchase Code',
                             style: Theme.of(context).textTheme.titleSmall,
                           ),
                           const SizedBox(
@@ -122,7 +141,7 @@ class _VerifyInfoState extends ConsumerState<VerifyInfo> {
                             child: TextFormField(
                               controller: textFieldCtlr,
                               validator: (value) {
-                                if (value!.isEmpty) return AppLocalizations.of(context).verifyRequired;
+                                if (value!.isEmpty) return 'Purchase code is required';
                                 return null;
                               },
                               decoration: InputDecoration(
@@ -130,7 +149,7 @@ class _VerifyInfoState extends ConsumerState<VerifyInfo> {
                                   onPressed: () => textFieldCtlr.clear(),
                                   icon: const Icon(Icons.clear),
                                 ),
-                                hintText: AppLocalizations.of(context).verifyHint,
+                                hintText: 'Your Purchase Code',
                                 border: InputBorder.none,
                                 contentPadding: const EdgeInsets.all(15),
                               ),
@@ -149,7 +168,7 @@ class _VerifyInfoState extends ConsumerState<VerifyInfo> {
                             animateOnTap: false,
                             elevation: 0,
                             child: Text(
-                              AppLocalizations.of(context).verifyButton,
+                              'Verify',
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white),
                             ),
                           ),

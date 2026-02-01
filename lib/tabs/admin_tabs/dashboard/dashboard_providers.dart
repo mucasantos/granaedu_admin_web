@@ -40,3 +40,18 @@ final authorsCountProvider = FutureProvider<int>((ref)async{
   final int count = await FirebaseService().getAuthorsCount();
   return count;
 });
+
+final totalXPProvider = FutureProvider<int>((ref) async {
+  final int count = await FirebaseService().getTotalXP();
+  return count;
+});
+
+final averageStreakProvider = FutureProvider<double>((ref) async {
+  final double avg = await FirebaseService().getAverageStreak();
+  return avg;
+});
+
+final activeTodayProvider = FutureProvider<int>((ref) async {
+  final int count = await FirebaseService().getDailyActiveUsersCount();
+  return count;
+});

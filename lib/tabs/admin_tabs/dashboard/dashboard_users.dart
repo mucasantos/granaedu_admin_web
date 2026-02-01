@@ -4,7 +4,6 @@ import 'package:lms_admin/components/side_menu.dart';
 import 'package:lms_admin/mixins/user_mixin.dart';
 import 'package:lms_admin/models/user_model.dart';
 import 'package:lms_admin/services/firebase_service.dart';
-import 'package:lms_admin/l10n/app_localizations.dart';
 import '../../../pages/home.dart';
 
 final dashboardUsersProvider = FutureProvider<List<UserModel>>((ref) async {
@@ -32,7 +31,7 @@ class DashboardUsers extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                AppLocalizations.of(context).dashboardNewUsers,
+                'New Users',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               TextButton(
@@ -40,7 +39,7 @@ class DashboardUsers extends ConsumerWidget {
                     ref.read(menuIndexProvider.notifier).update((state) => 6);
                     ref.read(pageControllerProvider.notifier).state.jumpToPage(6);
                   },
-                  child: Text(AppLocalizations.of(context).commonViewAll))
+                  child: const Text('View All'))
             ],
           ),
           Padding(
@@ -53,7 +52,7 @@ class DashboardUsers extends ConsumerWidget {
                         contentPadding: const EdgeInsets.symmetric(vertical: 5),
                         leading: UserMixin.getUserImageByUrl(imageUrl: user.imageUrl),
                         title: Text(user.name),
-                        subtitle: Text(AppLocalizations.of(context).dashboardEnrolledCourses(user.enrolledCourses?.length ?? 0)));
+                        subtitle: Text('Enrolled Courses: ${user.enrolledCourses?.length}'));
                   }).toList(),
                 );
               },

@@ -8,7 +8,6 @@ import 'package:lms_admin/models/user_model.dart';
 import 'package:lms_admin/services/app_service.dart';
 import 'package:lms_admin/services/firebase_service.dart';
 import 'package:lms_admin/utils/custom_cache_image.dart';
-import 'package:lms_admin/l10n/app_localizations.dart';
 
 final enrolledCoursesProvider = FutureProvider.autoDispose.family<List<Course>, List>((ref, courseIds) async {
   if (courseIds.isEmpty) return [];
@@ -60,14 +59,14 @@ class UserInfo extends ConsumerWidget with UsersMixins, UserMixin {
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 5),
-                  Text(AppLocalizations.of(context).accountCreated(AppService.getDateTime(user.createdAt))),
+                  Text('Account Created: ${AppService.getDateTime(user.createdAt)}'),
                   const SizedBox(height: 5),
                   getEmail(user, ref),
                   const SizedBox(height: 5),
                   Wrap(
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      Text(AppLocalizations.of(context).subscriptionLabel),
+                      const Text('Subscription: '),
                       getSubscription(context, user),
                     ],
                   ),
@@ -94,7 +93,7 @@ class UserInfo extends ConsumerWidget with UsersMixins, UserMixin {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    AppLocalizations.of(context).enrolledCoursesTitle(enrolledCourses.value?.length ?? 0),
+                    'Enrolled Courses (${enrolledCourses.value?.length})',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const Divider(),
@@ -103,7 +102,7 @@ class UserInfo extends ConsumerWidget with UsersMixins, UserMixin {
                     loading: () => Container(),
                     error: (error, stackTrace) => Container(),
                     data: (data) => data.isEmpty
-                        ? Text(AppLocalizations.of(context).noCoursesFound)
+                        ? const Text('No courses found')
                         : Column(
                             children: data
                                 .map((e) => CourseTileBasic(
@@ -123,7 +122,7 @@ class UserInfo extends ConsumerWidget with UsersMixins, UserMixin {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    AppLocalizations.of(context).wishlistTitle(wishList.value?.length ?? 0),
+                    'Wishlist (${wishList.value?.length})',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const Divider(),
@@ -132,7 +131,7 @@ class UserInfo extends ConsumerWidget with UsersMixins, UserMixin {
                     loading: () => Container(),
                     error: (error, stackTrace) => Container(),
                     data: (data) => data.isEmpty
-                        ? Text(AppLocalizations.of(context).noCoursesFound)
+                        ? const Text('No courses found')
                         : Column(
                             children: data
                                 .map((e) => CourseTileBasic(
@@ -178,7 +177,7 @@ class CourseTileBasic extends StatelessWidget {
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(AppLocalizations.of(context).byAuthor(course.author?.name ?? '')),
+          Text('By ${course.author?.name}'),
           Visibility(
             visible: showProgress ?? false,
             child: Column(
@@ -195,7 +194,7 @@ class CourseTileBasic extends StatelessWidget {
                     backgroundColor: Colors.grey.shade300,
                   ),
                 ),
-                Text(AppLocalizations.of(context).percentCompleted(int.parse(courseProgesString))),
+                Text('$courseProgesString% completed'),
               ],
             ),
           ),

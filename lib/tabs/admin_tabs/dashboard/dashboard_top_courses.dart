@@ -4,7 +4,7 @@ import 'package:lms_admin/mixins/course_mixin.dart';
 import 'package:lms_admin/components/side_menu.dart';
 import 'package:lms_admin/models/course.dart';
 import 'package:lms_admin/services/firebase_service.dart';
-import 'package:lms_admin/l10n/app_localizations.dart';
+import '../../../configs/constants.dart';
 import '../../../pages/home.dart';
 import '../../../utils/custom_cache_image.dart';
 
@@ -33,7 +33,7 @@ class DashboardTopCourses extends ConsumerWidget with CourseMixin {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                AppLocalizations.of(context).dashboardTopCourses,
+                'Top Courses',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               TextButton(
@@ -41,7 +41,7 @@ class DashboardTopCourses extends ConsumerWidget with CourseMixin {
                     ref.read(menuIndexProvider.notifier).update((state) => 1);
                     ref.read(pageControllerProvider.notifier).state.jumpToPage(1);
                   },
-                  child: Text(AppLocalizations.of(context).commonViewAll))
+                  child: const Text('View All'))
             ],
           ),
           Padding(
@@ -65,13 +65,11 @@ class DashboardTopCourses extends ConsumerWidget with CourseMixin {
                       title: Text(course.name),
                       subtitle: Row(
                         children: [
-                          Text(AppLocalizations.of(context).dashboardStudentsCount(course.studentsCount)),
+                          Text('${course.studentsCount} students'),
                           const SizedBox(
                             width: 10,
                           ),
-                          Text(course.priceStatus == 'free'
-                              ? AppLocalizations.of(context).priceStatusFree
-                              : AppLocalizations.of(context).priceStatusPremium),
+                          Text('${priceStatus[course.priceStatus]}'),
                         ],
                       ),
                     );

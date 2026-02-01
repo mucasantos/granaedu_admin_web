@@ -14,14 +14,13 @@ class Category {
   });
 
   factory Category.fromFirestore(DocumentSnapshot snap) {
-    final Map<String, dynamic> d = snap.data() as Map<String, dynamic>;
-    final Timestamp? ts = d['created_at'] as Timestamp?;
+    Map d = snap.data() as Map<String, dynamic>;
     return Category(
-      id: snap.id,
-      name: (d['name'] as String?) ?? '',
-      thumbnailUrl: (d['image_url'] as String?) ?? '',
-      createdAt: ts != null ? ts.toDate() : DateTime.now(),
-      orderIndex: (d['index'] is int) ? d['index'] as int : 0,
+        id: snap.id,
+        name: d['name'],
+        thumbnailUrl: d['image_url'],
+        createdAt: (d['created_at'] as Timestamp).toDate(),
+        orderIndex: d['index'] ?? 0,
     );
   }
 

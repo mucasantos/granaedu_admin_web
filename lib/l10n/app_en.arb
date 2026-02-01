@@ -162,8 +162,21 @@
 
   "authorTotalStudents": "Total Students",
   "authorTotalCourses": "Total Courses",
-  "authorTotalReviews": "Total Reviews"
-  ,
+  "authorTotalReviews": "Total Reviews",
+
+  "dashboardTotalUsers": "Total Users",
+  "dashboardTotalEnrolled": "Total Enrolled",
+  "dashboardTotalSubscribed": "Total Subscribed",
+  "dashboardTotalPurchases": "Total Purchases",
+  "dashboardTotalAuthors": "Total Authors",
+  "dashboardTotalCourses": "Total Courses",
+  "dashboardTotalNotifications": "Total Notifications",
+  "dashboardTotalReviews": "Total Reviews",
+  "dashboardTotalXP": "Total XP",
+  "dashboardAvgStreak": "Avg Streak",
+  "dashboardActiveToday": "Active Today",
+  "dashboardStudentsSummary": "Students Summary",
+  "dashboardCoursesSummary": "Courses Summary",
   "priceStatusFree": "Free",
   "priceStatusPremium": "Premium"
 }

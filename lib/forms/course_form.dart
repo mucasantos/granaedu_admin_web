@@ -10,6 +10,8 @@ import 'package:lms_admin/mixins/course_mixin.dart';
 import 'package:lms_admin/components/custom_buttons.dart';
 import 'package:lms_admin/components/dialogs.dart';
 import 'package:lms_admin/components/radio_options.dart';
+import 'package:lms_admin/models/app_settings_model.dart';
+import 'package:lms_admin/tabs/admin_tabs/app_settings/app_setting_providers.dart';
 import 'package:lms_admin/utils/reponsive.dart';
 import 'package:lms_admin/mixins/sections_mixin.dart';
 import 'package:lms_admin/components/tags_dropdown.dart';
@@ -393,11 +395,18 @@ class _CourseFormState extends ConsumerState<CourseForm> with TextFields, Sectio
               ),
               Consumer(
                 builder: (context, ref, child) {
-               
+                  final settings = ref.watch(appSettingsProvider);
+                  final LicenseType license = settings.value?.license ?? LicenseType.none;
+                  final bool isExtendedLicense = license == LicenseType.extended;
+
                   return RadioOptions(
                     contentType: _pricingStatus,
                     onChanged: (value) {
-                      setState(() => _pricingStatus = value);
+                      if (isExtendedLicense) {
+                        setState(() => _pricingStatus = value);
+                      } else {
+                        openFailureToast(context, 'Extended license is required');
+                      }
                     },
                     options: priceStatus,
                     title: 'Course Pricing',

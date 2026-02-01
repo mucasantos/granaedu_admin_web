@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppConfig {
   // App Name
-  static const String appName = 'Educa4All';
+  static const String appName = 'PrimeLMS';
 
   // Default theme color - Change Hex code <3F51B5>
   static const Color themeColor = Color(0xFF3F51B5);

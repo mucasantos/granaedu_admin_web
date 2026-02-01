@@ -4,7 +4,6 @@ import 'package:lms_admin/forms/quiz_form.dart';
 import 'package:lms_admin/components/custom_buttons.dart';
 import 'package:lms_admin/components/dialogs.dart';
 import 'package:lms_admin/models/question.dart';
-import 'package:lms_admin/l10n/app_localizations.dart';
 
 class Questions extends ConsumerWidget {
   const Questions({Key? key}) : super(key: key);
@@ -18,10 +17,10 @@ class Questions extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(AppLocalizations.of(context).questionsTitle, style: Theme.of(context).textTheme.titleLarge),
+            Text('Questions *', style: Theme.of(context).textTheme.titleLarge),
             TextButton.icon(
               icon: const Icon(Icons.add),
-              label: Text(AppLocalizations.of(context).addQuestion),
+              label: const Text('Add Question'),
               style: IconButton.styleFrom(backgroundColor: Colors.grey.shade300, foregroundColor: Theme.of(context).primaryColor),
               onPressed: () {
                 CustomDialogs.openResponsiveDialog(context, widget: const QuizForm(), verticalPaddingPercentage: 0.03);
@@ -31,9 +30,9 @@ class Questions extends ConsumerWidget {
         ),
         const SizedBox(height: 20),
         questions.isEmpty
-            ? Padding(
+            ? const Padding(
                 padding: EdgeInsets.only(top: 40),
-                child: Center(child: Text(AppLocalizations.of(context).noQuestionsFound)),
+                child: Center(child: Text('No questions found')),
               )
             : ReorderableListView.builder(
                 buildDefaultDragHandles: false,
@@ -48,7 +47,7 @@ class Questions extends ConsumerWidget {
                     index: index,
                     key: Key(index.toString()),
                     child: ListTile(
-                      title: Text(AppLocalizations.of(context).questionIndexTitle(index + 1, q.questionTitle)),
+                      title: Text('Q${index+1}. ${q.questionTitle}'),
                       contentPadding: const EdgeInsets.symmetric(vertical: 15),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,7 +56,7 @@ class Questions extends ConsumerWidget {
                           const SizedBox(
                             height: 5,
                           ),
-                          Text(AppLocalizations.of(context).correctAnswer(q.options[q.correctAnswerIndex])),
+                          Text('Correct Answer: ${q.options[q.correctAnswerIndex]}'),
                         ],
                       ),
                       leading: const Icon(Icons.drag_handle),

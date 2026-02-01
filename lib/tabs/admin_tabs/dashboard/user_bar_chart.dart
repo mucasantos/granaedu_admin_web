@@ -6,7 +6,6 @@ import 'package:line_icons/line_icons.dart';
 import 'package:lms_admin/models/chart_model.dart';
 import 'package:lms_admin/services/firebase_service.dart';
 import 'package:lms_admin/tabs/admin_tabs/dashboard/empty_bar_chart.dart';
-import 'package:lms_admin/l10n/app_localizations.dart';
 
 final userStatsProvider = FutureProvider<List<ChartModel>>((ref) async {
   final int days = ref.read(usersStateDaysCount);
@@ -36,16 +35,16 @@ class UserBarChart extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(LineIcons.userPlus),
-                const SizedBox(
+                Icon(LineIcons.userPlus),
+                SizedBox(
                   width: 20,
                 ),
                 Text(
-                  AppLocalizations.of(context).chartNewUserRegistrationTitle,
-                  style: const TextStyle(
+                  'News User Registration',
+                  style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                   ),
@@ -76,9 +75,13 @@ class UserBarChart extends ConsumerWidget {
                 indicatorPadding: const EdgeInsets.all(8),
                 tabAlignment: TabAlignment.center,
                 labelPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 30),
-                tabs: [
-                  Tab(child: Text(AppLocalizations.of(context).chartLast7Days)),
-                  Tab(child: Text(AppLocalizations.of(context).chartLast30Days)),
+                tabs: const [
+                  Tab(
+                    child: Text('Last 7 Days'),
+                  ),
+                  Tab(
+                    child: Text('Last 30 Days'),
+                  )
                 ],
               ),
             ),
@@ -139,7 +142,7 @@ class UserBarChart extends ConsumerWidget {
         final ChartModel model = usersStat[groupIndex];
         final String formattedDate = DateFormat('dd/MM/yyyy').format(model.timestamp);
 
-        return BarTooltipItem(AppLocalizations.of(context).chartUsersTooltip(rod.toY.toInt()), const TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 16), children: [
+        return BarTooltipItem('${rod.toY} Users', const TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 16), children: [
           const TextSpan(text: '\n'),
           TextSpan(text: formattedDate, style: TextStyle(fontSize: 12, color: Colors.grey.shade400)),
         ]);

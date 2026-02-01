@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lms_admin/components/app_logo.dart';
 import 'package:lms_admin/configs/assets_config.dart';
-// Removed license gating: no longer relying on AppSettingsModel. 
+// import 'package:lms_admin/models/app_settings_model.dart';
 import 'package:lms_admin/pages/login.dart';
-// Removed Verify screen import since license flow is disabled.
+// import 'package:lms_admin/pages/verify.dart';
 import 'package:lms_admin/providers/user_data_provider.dart';
-// Removed app settings provider import as license check is removed.
+// import 'package:lms_admin/tabs/admin_tabs/app_settings/app_setting_providers.dart';
 import 'package:lms_admin/utils/next_screen.dart';
 import 'package:lms_admin/utils/toasts.dart';
 import '../providers/auth_state_provider.dart';
@@ -50,10 +50,13 @@ class _InitialScreen1State extends ConsumerState<SplashScreen> {
     if (role == UserRoles.admin || role == UserRoles.author) {
       ref.read(userRoleProvider.notifier).update((state) => role);
 
-      // License gating removed: load user data and go directly to Home.
-      await ref.read(userDataProvider.notifier).getData();
-      if (!mounted) return;
-      NextScreen.replaceAnimation(context, const Home());
+      const bool isVerified = true; // Bypassed purchase verification
+
+      if (isVerified) {
+        await ref.read(userDataProvider.notifier).getData();
+        if (!mounted) return;
+        NextScreen.replaceAnimation(context, const Home());
+      }
     } else {
       // Not ADMIN or AUTHOR
       await AuthService().adminLogout().then((value) {

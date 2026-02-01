@@ -51,13 +51,21 @@ class AuthService {
     UserRoles authState = UserRoles.none;
     await _firebaseFirestore.collection('users').doc(uid).get().then((DocumentSnapshot snap) {
       if (snap.exists) {
-        List? userRole = snap['role'];
+        dynamic userRole = snap['role'];
         debugPrint('User Role: $userRole');
         if (userRole != null) {
-          if (userRole.contains('admin')) {
-            authState = UserRoles.admin;
-          } else if (userRole.contains('author')) {
-            authState = UserRoles.author;
+          if (userRole is List) {
+            if (userRole.contains('admin')) {
+              authState = UserRoles.admin;
+            } else if (userRole.contains('author')) {
+              authState = UserRoles.author;
+            }
+          } else if (userRole is String) {
+            if (userRole == 'admin') {
+              authState = UserRoles.admin;
+            } else if (userRole == 'author') {
+              authState = UserRoles.author;
+            }
           }
         }
       }

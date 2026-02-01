@@ -4,6 +4,7 @@ import 'package:rounded_loading_button_plus/rounded_loading_button.dart';
 
 import '../../../models/app_settings_model.dart';
 import '../../../services/firebase_service.dart';
+import '../../../services/supabase_service.dart';
 import '../ads_settings.dart';
 
 final saveSettingsBtnProvider = Provider<RoundedLoadingButtonController>((ref) => RoundedLoadingButtonController());
@@ -23,6 +24,20 @@ final isTagsEnabledProvider = StateProvider<bool>((ref) => true);
 final websiteTextfieldProvider = Provider<TextEditingController>((ref) => TextEditingController());
 final supportEmailTextfieldProvider = Provider<TextEditingController>((ref) => TextEditingController());
 final privacyUrlTextfieldProvider = Provider<TextEditingController>((ref) => TextEditingController());
+final openaiKeyTextfieldProvider =
+    Provider<TextEditingController>((ref) => TextEditingController());
+final supabaseUrlTextfieldProvider =
+    Provider<TextEditingController>((ref) => TextEditingController());
+final supabaseKeyTextfieldProvider =
+    Provider<TextEditingController>((ref) => TextEditingController());
+final elevenlabsKeyTextfieldProvider =
+    Provider<TextEditingController>((ref) => TextEditingController());
+final weeklyPlanPromptTextfieldProvider =
+    Provider<TextEditingController>((ref) => TextEditingController());
+final grammarPromptTextfieldProvider =
+    Provider<TextEditingController>((ref) => TextEditingController());
+final chatSystemPromptTextfieldProvider =
+    Provider<TextEditingController>((ref) => TextEditingController());
 final isSkipLoginEnabledProvider = StateProvider<bool>((ref) => false);
 final isOnboardingEnabledProvider = StateProvider<bool>((ref) => true);
 final isContentSecurityEnabledProvider = StateProvider<bool>((ref) => false);
@@ -60,10 +75,25 @@ final appSettingsProvider = FutureProvider<AppSettingsModel?>((ref) async {
     ref.read(websiteTextfieldProvider).text = settings.website ?? '';
     ref.read(supportEmailTextfieldProvider).text = settings.supportEmail ?? '';
     ref.read(privacyUrlTextfieldProvider).text = settings.privacyUrl ?? '';
+    ref.read(openaiKeyTextfieldProvider).text = settings.openaiKey ?? '';
+    ref.read(supabaseUrlTextfieldProvider).text = settings.supabaseUrl ?? '';
+    ref.read(supabaseKeyTextfieldProvider).text = settings.supabaseKey ?? '';
+    ref.read(elevenlabsKeyTextfieldProvider).text =
+        settings.elevenlabsKey ?? '';
+    ref.read(weeklyPlanPromptTextfieldProvider).text =
+        settings.weeklyPlanPrompt ?? '';
+    ref.read(grammarPromptTextfieldProvider).text =
+        settings.grammarPrompt ?? '';
+    ref.read(chatSystemPromptTextfieldProvider).text =
+        settings.chatSystemPrompt ?? '';
 
     ref.read(adsEnbaledProvider.notifier).state = settings.ads?.isAdsEnabled ?? false;
     ref.read(bannerAdProvider.notifier).state = settings.ads?.bannerEnbaled ?? false;
     ref.read(interstitialAdProvider.notifier).state = settings.ads?.interstitialEnabled ?? false;
+
+    // Initialize Supabase
+    await SupabaseService.init(
+        url: settings.supabaseUrl, anonKey: settings.supabaseKey);
   }
 
   return settings;

@@ -28,7 +28,7 @@ class SideMenu extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 20, top: 30),
         child: Column(
           children: [
-            const AppLogo(imageString: AssetsConfig.logoDark, height: 100, width: 240),
+            const AppLogo(imageString: AssetsConfig.logoDark),
             const SizedBox(height: 30),
             ListView.builder(
               physics: const NeverScrollableScrollPhysics(),

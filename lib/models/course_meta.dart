@@ -14,38 +14,13 @@ class CourseMeta {
   });
 
   factory CourseMeta.fromMap(Map<String, dynamic> meta) {
-    final dynamic durationRaw = meta['duration'];
-    final String? duration = durationRaw == null
-        ? null
-        : (durationRaw is String
-            ? durationRaw
-            : durationRaw.toString());
-
-    final dynamic summaryRaw = meta['summary'];
-    final String? summary = summaryRaw == null
-        ? null
-        : (summaryRaw is String ? summaryRaw : summaryRaw.toString());
-
-    final dynamic descriptionRaw = meta['description'];
-    final String? description = descriptionRaw == null
-        ? null
-        : (descriptionRaw is String ? descriptionRaw : descriptionRaw.toString());
-
-    final dynamic languageRaw = meta['language'];
-    final String? language = languageRaw == null
-        ? null
-        : (languageRaw is String ? languageRaw : languageRaw.toString());
-
-    final List? learnings = meta['learnings'] is List ? meta['learnings'] as List : [];
-    final List? requirements = meta['requirements'] is List ? meta['requirements'] as List : [];
-
     return CourseMeta(
-      duration: duration,
-      summary: summary,
-      description: description,
-      learnings: learnings,
-      requirements: requirements,
-      language: language,
+      duration: meta['duration'],
+      summary: meta['summary'],
+      description: meta['description'],
+      learnings: meta['learnings'],
+      requirements: meta['requirements'],
+      language: meta['language']
     );
   }
 

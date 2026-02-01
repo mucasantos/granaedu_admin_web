@@ -20,29 +20,16 @@ class Review {
   });
 
   factory Review.fromFirebase(DocumentSnapshot snap) {
-    final Map<String, dynamic> d = snap.data() as Map<String, dynamic>;
-
-    final dynamic ratingRaw = d['rating'];
-    final double rating = ratingRaw == null
-        ? 0.0
-        : (ratingRaw is num
-            ? ratingRaw.toDouble()
-            : double.tryParse(ratingRaw.toString()) ?? 0.0);
-
-    final Timestamp? ts = d['created_at'] as Timestamp?;
-
-    final Map<String, dynamic> userMap =
-        (d['user'] as Map?)?.cast<String, dynamic>() ?? <String, dynamic>{};
-
+    Map d = snap.data() as Map<String, dynamic>;
     return Review(
       id: snap.id,
-      courseId: (d['course_id']?.toString()) ?? '',
-      courseAuthorId: (d['course_author_id']?.toString()) ?? '',
-      courseTitle: (d['course_title'] as String?) ?? '',
-      rating: rating,
-      review: (d['review'] as String?) ?? '',
-      createdAt: ts != null ? ts.toDate() : DateTime.now(),
-      reviewUser: ReviewUser.fromFirebase(userMap),
+      courseId: d['course_id'],
+      courseAuthorId: d['course_author_id'],
+      courseTitle: d['course_title'],
+      rating: d['rating'],
+      review: d['review'],
+      createdAt: (d['created_at'] as Timestamp).toDate(),
+      reviewUser: ReviewUser.fromFirebase(d['user']),
     );
   }
 }

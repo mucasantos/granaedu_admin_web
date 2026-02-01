@@ -3,8 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lms_admin/components/app_logo.dart';
-import 'package:lms_admin/components/language_switcher.dart';
 import 'package:lms_admin/configs/assets_config.dart';
+// import 'package:lms_admin/models/app_settings_model.dart';
+// import 'package:lms_admin/pages/verify.dart';
 import 'package:lms_admin/providers/auth_state_provider.dart';
 import 'package:lms_admin/providers/user_data_provider.dart';
 import 'package:lms_admin/utils/reponsive.dart';
@@ -13,8 +14,9 @@ import 'package:lms_admin/services/auth_service.dart';
 import 'package:lms_admin/utils/next_screen.dart';
 import 'package:lms_admin/utils/toasts.dart';
 import 'package:rounded_loading_button_plus/rounded_loading_button.dart';
-import 'package:lms_admin/l10n/app_localizations.dart';
+import 'package:svg_flutter/svg.dart';
 
+// import '../tabs/admin_tabs/app_settings/app_setting_providers.dart';
 
 class Login extends ConsumerStatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -56,7 +58,7 @@ class _LoginState extends ConsumerState<Login> {
       } else {
         _btnCtlr.reset();
         if (!mounted) return;
-        openFailureToast(context, AppLocalizations.of(context).authInvalidCredentials);
+        openFailureToast(context, 'Email/Password is invalid');
       }
     }
   }
@@ -65,11 +67,18 @@ class _LoginState extends ConsumerState<Login> {
     final UserRoles role = await AuthService().checkUserRole(userCredential.user!.uid);
     if (role == UserRoles.admin || role == UserRoles.author) {
       ref.read(userRoleProvider.notifier).update((state) => role);
-      await ref.read(userDataProvider.notifier).getData();
-      if (!mounted) return;
-      NextScreen.replaceAnimation(context, const Home());
+
+      const bool isVerified = true; // Bypassed purchase verification
+
+      if (isVerified) {
+        await ref.read(userDataProvider.notifier).getData();
+        if (!mounted) return;
+        NextScreen.replaceAnimation(context, const Home());
+      }
     } else {
-      await AuthService().adminLogout().then((value) => openFailureToast(context, AppLocalizations.of(context).authAccessDenied));
+      await AuthService()
+          .adminLogout()
+          .then((value) => openFailureToast(context, 'Access Denied'));
     }
   }
 
@@ -84,7 +93,7 @@ class _LoginState extends ConsumerState<Login> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        color: Colors.indigo.withValues(alpha: 0.1),
+        color: Colors.indigo.withOpacity(0.1),
         child: Row(
           children: [
             Visibility(
@@ -92,7 +101,7 @@ class _LoginState extends ConsumerState<Login> {
               child: Flexible(
                 flex: 1,
                 fit: FlexFit.tight,
-                child: Image.asset(
+                child: SvgPicture.asset(
                   AssetsConfig.loginImageString,
                   alignment: Alignment.center,
                   height: 400,
@@ -120,13 +129,12 @@ class _LoginState extends ConsumerState<Login> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const AppLogo(imageString: AssetsConfig.logo, height: 60, width: 250),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: const [LanguageSwitcher()],
-                        ),
+                        const AppLogo(
+                            imageString: AssetsConfig.logo,
+                            height: 60,
+                            width: 250),
                         Text(
-                          AppLocalizations.of(context).loginSignInTitle,
+                          'Sign In to the Admin Panel',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.blueGrey),
                         ),
                         const SizedBox(
@@ -136,7 +144,7 @@ class _LoginState extends ConsumerState<Login> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              AppLocalizations.of(context).commonEmail,
+                              'Email',
                               style: Theme.of(context).textTheme.titleSmall,
                             ),
                             const SizedBox(
@@ -148,7 +156,8 @@ class _LoginState extends ConsumerState<Login> {
                                 keyboardType: TextInputType.emailAddress,
                                 controller: emailCtlr,
                                 validator: (value) {
-                                  if (value!.isEmpty) return AppLocalizations.of(context).validationEmailRequired;
+                                  if (value!.isEmpty)
+                                    return 'Email is required';
                                   return null;
                                 },
                                 decoration: InputDecoration(
@@ -156,7 +165,7 @@ class _LoginState extends ConsumerState<Login> {
                                     onPressed: () => emailCtlr.clear(),
                                     icon: const Icon(Icons.clear),
                                   ),
-                                  hintText: AppLocalizations.of(context).loginHintEmailAddress,
+                                  hintText: 'Email Address',
                                   border: InputBorder.none,
                                   contentPadding: const EdgeInsets.all(15),
                                 ),
@@ -166,7 +175,7 @@ class _LoginState extends ConsumerState<Login> {
                               height: 30,
                             ),
                             Text(
-                              AppLocalizations.of(context).commonPassword,
+                              'Password',
                               style: Theme.of(context).textTheme.titleSmall,
                             ),
                             const SizedBox(
@@ -178,7 +187,8 @@ class _LoginState extends ConsumerState<Login> {
                                 controller: passwordCtrl,
                                 obscureText: _obsecureText,
                                 validator: (value) {
-                                  if (value!.isEmpty) return AppLocalizations.of(context).validationPasswordRequired;
+                                  if (value!.isEmpty)
+                                    return 'Password is required';
                                   return null;
                                 },
                                 decoration: InputDecoration(
@@ -188,7 +198,7 @@ class _LoginState extends ConsumerState<Login> {
                                         IconButton(onPressed: () => passwordCtrl.clear(), icon: const Icon(Icons.clear)),
                                       ],
                                     ),
-                                    hintText: AppLocalizations.of(context).loginHintPassword,
+                                    hintText: 'Your Password',
                                     border: InputBorder.none,
                                     contentPadding: const EdgeInsets.all(15)),
                               ),
@@ -206,7 +216,7 @@ class _LoginState extends ConsumerState<Login> {
                               animateOnTap: false,
                               elevation: 0,
                               child: Text(
-                                AppLocalizations.of(context).commonLogin,
+                                'Login',
                                 style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white),
                               ),
                             ),

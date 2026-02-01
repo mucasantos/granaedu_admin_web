@@ -320,6 +320,34 @@ class FirebaseService {
     return count;
   }
 
+  Future<int> getTotalXP() async {
+    final CollectionReference collectionReference =
+        firestore.collection('users');
+    AggregateQuerySnapshot snap =
+        await collectionReference.aggregate(sum('xp')).get();
+    return snap.getSum('xp')?.toInt() ?? 0;
+  }
+
+  Future<double> getAverageStreak() async {
+    final CollectionReference collectionReference =
+        firestore.collection('users');
+    AggregateQuerySnapshot snap =
+        await collectionReference.aggregate(average('streak')).get();
+    return snap.getAverage('streak') ?? 0.0;
+  }
+
+  Future<int> getDailyActiveUsersCount() async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final CollectionReference collectionReference =
+        firestore.collection('users');
+    AggregateQuerySnapshot snap = await collectionReference
+        .where('last_check_in', isEqualTo: Timestamp.fromDate(today))
+        .count()
+        .get();
+    return snap.count ?? 0;
+  }
+
   Future<int> getAuthorCoursesCount(String authorId) async {
     final CollectionReference collectionReference = firestore.collection('courses');
     AggregateQuerySnapshot snap =

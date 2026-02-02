@@ -5,6 +5,7 @@ enum LicenseType { none, regular, extended }
 
 class AppSettingsModel {
   final bool? freeCourses, topAuthors, categories, featured, tags, skipLogin, onBoarding, latestCourses, contentSecurity;
+  final bool enableStrictLocking;
   final String? supportEmail,
       website,
       privacyUrl,
@@ -39,6 +40,7 @@ class AppSettingsModel {
     this.ads,
     this.license,
     this.contentSecurity,
+    this.enableStrictLocking = true,
     this.openaiKey,
     this.supabaseUrl,
     this.supabaseKey,
@@ -69,6 +71,7 @@ class AppSettingsModel {
       ads: d['ads'] != null ? AdsModel.fromMap(d['ads']) : null,
       license: _getLicenseType(d['license']),
       contentSecurity: d['content_security'] ?? false,
+      enableStrictLocking: d['enable_strict_locking'] ?? true,
       openaiKey: d['openai_key'],
       supabaseUrl: d['supabase_url'],
       supabaseKey: d['supabase_key'],
@@ -107,6 +110,7 @@ class AppSettingsModel {
       'category3': d.homeCategory3 != null ? HomeCategory.getMap(d.homeCategory3!) : null,
       'social': d.social != null ? AppSettingsSocialInfo.getMap(d.social!) : null,
       'content_security': d.contentSecurity,
+      'enable_strict_locking': d.enableStrictLocking,
       'openai_key': d.openaiKey,
       'supabase_url': d.supabaseUrl,
       'supabase_key': d.supabaseKey,

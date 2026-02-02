@@ -41,6 +41,7 @@ final chatSystemPromptTextfieldProvider =
 final isSkipLoginEnabledProvider = StateProvider<bool>((ref) => false);
 final isOnboardingEnabledProvider = StateProvider<bool>((ref) => true);
 final isContentSecurityEnabledProvider = StateProvider<bool>((ref) => false);
+final isStrictLockingEnabledProvider = StateProvider<bool>((ref) => true);
 
 
 final fbProvider = Provider<TextEditingController>((ref) => TextEditingController());
@@ -63,6 +64,8 @@ final appSettingsProvider = FutureProvider<AppSettingsModel?>((ref) async {
     ref.read(isSkipLoginEnabledProvider.notifier).state = settings.skipLogin!;
     ref.read(isOnboardingEnabledProvider.notifier).state = settings.onBoarding!;
     ref.read(isContentSecurityEnabledProvider.notifier).state = settings.contentSecurity!;
+    ref.read(isStrictLockingEnabledProvider.notifier).state =
+        settings.enableStrictLocking;
 
     ref.read(selectedHomeCategoryId1Provider.notifier).state = settings.homeCategory1?.id;
     ref.read(selectedHomeCategoryId2Provider.notifier).state = settings.homeCategory2?.id;

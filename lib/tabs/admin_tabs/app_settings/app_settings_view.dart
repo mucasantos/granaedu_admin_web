@@ -28,6 +28,7 @@ class AppSettings extends ConsumerWidget with TextFields {
     final isSkipLoginEnabled = ref.watch(isSkipLoginEnabledProvider);
     final onBoardingEnabled = ref.watch(isOnboardingEnabledProvider);
     final contentSecurityEnabled = ref.watch(isContentSecurityEnabledProvider);
+    final isStrictLockingEnabled = ref.watch(isStrictLockingEnabledProvider);
 
     final websiteCtlr = ref.watch(websiteTextfieldProvider);
     final supportEmailCtlr = ref.watch(supportEmailTextfieldProvider);
@@ -104,6 +105,7 @@ class AppSettings extends ConsumerWidget with TextFields {
                   weeklyPlanPrompt: weeklyPlanPromptCtlr.text,
                   grammarPrompt: grammarPromptCtlr.text,
                   chatSystemPrompt: chatSystemPromptCtlr.text,
+                  enableStrictLocking: isStrictLockingEnabled,
                 );
 
                 final data = AppSettingsModel.getMap(appSettingsModel);
@@ -278,6 +280,16 @@ class AppSettings extends ConsumerWidget with TextFields {
                                   }
                                 },
                               ),
+                              SwitchOption(
+                                  deafultValue: isStrictLockingEnabled,
+                                  title:
+                                      'Enable Strict Task Locking (Sequential)',
+                                  onChanged: (value) {
+                                    ref
+                                        .read(isStrictLockingEnabledProvider
+                                            .notifier)
+                                        .update((state) => value);
+                                  }),
                             ],
                           ),
                         ),

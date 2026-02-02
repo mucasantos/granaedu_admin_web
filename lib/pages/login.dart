@@ -16,7 +16,7 @@ import 'package:lms_admin/utils/toasts.dart';
 import 'package:rounded_loading_button_plus/rounded_loading_button.dart';
 import 'package:svg_flutter/svg.dart';
 
-// import '../tabs/admin_tabs/app_settings/app_setting_providers.dart';
+import '../tabs/admin_tabs/app_settings/app_setting_providers.dart';
 
 class Login extends ConsumerStatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -71,6 +71,9 @@ class _LoginState extends ConsumerState<Login> {
       const bool isVerified = true; // Bypassed purchase verification
 
       if (isVerified) {
+        // First ensure settings are loaded and Supabase is initialized
+        await ref.read(appSettingsProvider.future);
+        
         await ref.read(userDataProvider.notifier).getData();
         if (!mounted) return;
         NextScreen.replaceAnimation(context, const Home());

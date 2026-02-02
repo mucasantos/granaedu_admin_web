@@ -52,12 +52,18 @@ class SupabaseService {
   }
 
   /// Triggers the AI Orchestrator to generate a weekly plan
-  Future<void> generateWeeklyPlan(String firebaseUid) async {
+  Future<void> generateWeeklyPlan({
+    required String firebaseUid,
+    required String openaiKey,
+    required String systemPrompt,
+  }) async {
     await invokeFunction(
       'ai-orchestrator',
       body: {
         'firebase_uid': firebaseUid,
         'action': 'generate_weekly_plan',
+        'openai_key': openaiKey,
+        'system_prompt': systemPrompt,
       },
     );
   }

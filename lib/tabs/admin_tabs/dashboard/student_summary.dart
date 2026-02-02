@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lms_admin/mixins/user_mixin.dart';
 import 'package:lms_admin/models/user_model.dart';
 import 'package:lms_admin/services/firebase_service.dart';
+import 'package:lms_admin/services/supabase_service.dart';
+import 'package:lms_admin/tabs/admin_tabs/app_settings/app_setting_providers.dart';
+import 'package:lms_admin/utils/toasts.dart';
 import '../../../l10n/app_localizations.dart';
 
 final studentSummaryProvider = FutureProvider<List<UserModel>>((ref) async {
@@ -33,7 +36,7 @@ class StudentSummary extends ConsumerWidget {
           ),
           const SizedBox(height: 20),
           students.when(
-            data: (data) => _buildTable(context, data),
+            data: (data) => _buildTable(context, ref, data),
             error: (e, _) => Center(child: Text(e.toString())),
             loading: () => const Center(child: CircularProgressIndicator()),
           ),
@@ -42,12 +45,14 @@ class StudentSummary extends ConsumerWidget {
     );
   }
 
-  Widget _buildTable(BuildContext context, List<UserModel> students) {
+  Widget _buildTable(
+      BuildContext context, WidgetRef ref, List<UserModel> students) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: DataTable(
         columns: const [
           DataColumn(label: Text('Student')),
+          DataColumn(label: Text('Action')),
           DataColumn(label: Text('XP')),
           DataColumn(label: Text('Streak')),
           DataColumn(label: Text('Joined')),
@@ -67,6 +72,43 @@ class StudentSummary extends ConsumerWidget {
                   ],
                 ),
               ],
+            )),
+            DataCell(IconButton(
+              tooltip: 'Generate AI Weekly Plan',
+              icon: const Icon(Icons.psychology, color: Colors.indigo),
+              onPressed: () async {
+                final settingsValue = ref.read(appSettingsProvider).value;
+                if (settingsValue != null &&
+                    settingsValue.openaiKey != null &&
+                    settingsValue.weeklyPlanPrompt != null) {
+                  try {
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) =>
+                          const Center(child: CircularProgressIndicator()),
+                    );
+                    await SupabaseService().generateWeeklyPlan(
+                      firebaseUid: student.id,
+                      openaiKey: settingsValue.openaiKey!,
+                      systemPrompt: settingsValue.weeklyPlanPrompt!,
+                    );
+                    if (context.mounted) {
+                      Navigator.pop(context); // Close loading dialog
+                      openSuccessToast(
+                          context, 'Weekly plan generated successfully!');
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                      openFailureToast(context, 'Failed to generate plan: $e');
+                    }
+                  }
+                } else {
+                  openFailureToast(context,
+                      'Please configure OpenAI Key and Weekly Plan Prompt first');
+                }
+              },
             )),
             DataCell(Text(student.xp?.toString() ?? '0')),
             DataCell(Row(

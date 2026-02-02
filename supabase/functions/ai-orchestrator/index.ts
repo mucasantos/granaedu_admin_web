@@ -73,7 +73,14 @@ serve(async (req) => {
                     "content": {
                       "explanation": "Brief explanation",
                       "examples": ["example 1", "example 2"],
-                      "practice_prompt": "What the user should do"
+                      "practice_prompt": "What the user should do",
+                      "questions": [
+                        {
+                          "question": "Question text?",
+                          "options": ["A", "B", "C", "D"],
+                          "correct_ans_index": 0
+                        }
+                      ]
                     }
                   },
                   ... (up to 7 days)

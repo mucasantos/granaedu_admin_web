@@ -96,7 +96,7 @@ class _LoginState extends ConsumerState<Login> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        color: Colors.indigo.withOpacity(0.1),
+        color: Colors.indigo.withValues(alpha: 0.1),
         child: Row(
           children: [
             Visibility(

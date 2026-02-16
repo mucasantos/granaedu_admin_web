@@ -4,8 +4,10 @@ class WeeklyPlanModel {
   final DateTime weekStart;
   final String? level;
   final Map<String, dynamic>? focus;
+  final String? logic;
   final bool createdByAi;
   final DateTime? createdAt;
+  final Map<String, dynamic>? evaluation;
 
   WeeklyPlanModel({
     required this.id,
@@ -13,8 +15,10 @@ class WeeklyPlanModel {
     required this.weekStart,
     this.level,
     this.focus,
+    this.logic,
     this.createdByAi = true,
     this.createdAt,
+    this.evaluation,
   });
 
   factory WeeklyPlanModel.fromJson(Map<String, dynamic> json) {
@@ -24,8 +28,10 @@ class WeeklyPlanModel {
       weekStart: DateTime.parse(json['week_start']),
       level: json['level'],
       focus: json['focus'],
+      logic: json['logic'],
       createdByAi: json['created_by_ai'] ?? true,
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
+      evaluation: json['evaluation'],
     );
   }
 
@@ -36,7 +42,9 @@ class WeeklyPlanModel {
       'week_start': weekStart.toIso8601String(),
       'level': level,
       'focus': focus,
+      'logic': logic,
       'created_by_ai': createdByAi,
+      'evaluation': evaluation,
     };
   }
 }

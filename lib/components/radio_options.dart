@@ -33,23 +33,25 @@ class RadioOptions extends StatelessWidget {
         const SizedBox(
           width: 10,
         ),
-        Wrap(
-          children: options.entries.map((e) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Row(
-                children: [
-                  Radio(
-                    value: e.key,
-                    groupValue: contentType,
-                    activeColor: Theme.of(context).primaryColor,
-                    onChanged: (value) => onChanged(value),
-                  ),
-                  Text(e.value)
-                ],
-              ),
-            );
-          }).toList(),
+        RadioGroup<String>(
+          groupValue: contentType,
+          onChanged: (value) => onChanged(value),
+          child: Wrap(
+            children: options.entries.map((e) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  children: [
+                    Radio<String>(
+                      value: e.key,
+                      activeColor: Theme.of(context).primaryColor,
+                    ),
+                    Text(e.value)
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
         )
       ],
     );

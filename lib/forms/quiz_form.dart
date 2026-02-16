@@ -184,7 +184,7 @@ class _SectionFormState extends ConsumerState<QuizForm> with TextFields {
                 return null;
               },
               onChanged: (dynamic value) => setState(() => _correctAnswerIndex = value),
-              value: _correctAnswerIndex,
+              initialValue: _correctAnswerIndex,
               hint: const Text('Select Correct Answer'),
               items: <DropdownMenuItem>[
                 const DropdownMenuItem(

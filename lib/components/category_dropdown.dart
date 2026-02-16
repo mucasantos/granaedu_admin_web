@@ -53,7 +53,7 @@ class CategoryDropdown extends ConsumerWidget {
                     return null;
                   },
                   onChanged: (dynamic value) => onChanged(value),
-                  value: selectedId,
+                  initialValue: selectedId,
                   hint: const Text('Select Category'),
                   items: categories.map((f) {
                     return DropdownMenuItem(

@@ -622,6 +622,102 @@ serve(async (req: Request) => {
       Adapt tone and complexity strictly to the student's level (${userLevel}).`;
 
       // 2. Call OpenAI for deep content
+      let systemInstruction = CONTENT_PROMPT;
+      let userPrompt = '';
+
+      if (task.skill.toLowerCase() === 'writing') {
+        userPrompt = `Generate full content for an English WRITING task:
+              - Title: ${task.content?.title || 'General Lesson'}
+              - Student Level: ${userLevel}
+              - Goal: ${userGoal}
+              - Interests: ${Array.isArray(userInterests) ? userInterests.join(', ') : ''}
+
+              CRITICAL INSTRUCTIONS:
+              - You MUST provide a specific "Topic" or "Scenario" for the student to write about.
+              - "practice_prompt" MUST be the actual writing instruction (e.g. "Write an email to...").
+              - "questions" MUST be an empty array [].
+              - "explanation" should focus on tips for this specific writing type (e.g. formal email structure).
+              - DO NOT generate "reading_text".
+              
+              Respond ONLY with a valid JSON:
+              {
+                "title": "${task.content?.title}",
+                "explanation": "Tips and structure...",
+                "examples": ["Example 1", "Example 2"],
+                "practice_prompt": "Specific writing instruction",
+                "questions": []
+              }`;
+      } else if (task.skill.toLowerCase() === 'listening') {
+        userPrompt = `Generate full content for an English LISTENING task (Dialogue):
+              - Title: ${task.content?.title || 'General Lesson'}
+              - Student Level: ${userLevel}
+              - Goal: ${userGoal}
+              - Interests: ${Array.isArray(userInterests) ? userInterests.join(', ') : ''}
+
+              CRITICAL INSTRUCTIONS:
+              - Generate a **Dialogue Script** between two speakers (Speaker A and Speaker B).
+              - The dialogue should be natural, engaging, and relevant to the topic.
+              - "reading_text" must be the FULL concatenated text of the dialogue suitable for a narrator.
+              - "dialogue" must be an array of objects: { "speaker": "A", "text": "..." }.
+              - "questions" should be about the dialogue content.
+              - "explanation" should be a brief intro/context.
+
+              Respond ONLY with a valid JSON:
+              {
+                "title": "${task.content?.title}",
+                "reading_text": "Full text of dialogue...",
+                "dialogue": [
+                  { "speaker": "A", "text": "Hello." },
+                  { "speaker": "B", "text": "Hi there." }
+                ],
+                "vocabulary": [
+                   { "word": "term", "definition": "def", "context": "example" }
+                ],
+                "explanation": "Brief context...",
+                "questions": [
+                  {
+                    "question": "What did A say?",
+                    "options": ["A", "B", "C", "D"],
+                    "correct_ans_index": 0
+                  }
+                ]
+              }`;
+      } else {
+        // READING, SPEAKING, GRAMMAR, REVIEW, ETC.
+        userPrompt = `Generate full content for an English ${task.skill} task:
+              - Title: ${task.content?.title || 'General Lesson'}
+              - Student Level: ${userLevel}
+              - Goal: ${userGoal}
+              - Interests: ${Array.isArray(userInterests) ? userInterests.join(', ') : ''}
+
+              CRITICAL INSTRUCTIONS:
+              - You MUST provide a FULL context text (150-600 words).
+              - Topic MUST be related to student interests.
+              - For READING: Alternate between News/Articles and Stories.
+              - For SPEAKING/GRAMMAR: Contextual text with examples.
+              - QUESTIONS: 5-10 multiple-choice comprehension questions.
+              - VOCABULARY: 5-8 key terms.
+              
+              Respond ONLY with a valid JSON:
+              {
+                "title": "${task.content?.title}",
+                "reading_text": "Complete context text...",
+                "vocabulary": [
+                  { "word": "term", "definition": "def", "context": "example" }
+                ],
+                "explanation": "Brief summary...",
+                "examples": ["Ex 1", "Ex 2"],
+                "questions": [
+                  {
+                    "question": "Q?",
+                    "options": ["A", "B", "C", "D"],
+                    "correct_ans_index": 0
+                  }
+                ]
+              }`;
+      }
+
+      // 2. Call OpenAI for deep content
       const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -633,71 +729,11 @@ serve(async (req: Request) => {
           messages: [
             {
               role: 'system',
-              content: CONTENT_PROMPT
+              content: systemInstruction
             },
             {
               role: 'user',
-              content: `Generate full content for an English learning task:
-              - Skill: ${task.skill}
-              - Title: ${task.content?.title || 'General Lesson'}
-              - Student Level: ${userLevel}
-              - Student Goal: ${userGoal}
-              - Student Interests: ${Array.isArray(userInterests) ? userInterests.join(', ') : ''}
-
-              CRITICAL INSTRUCTIONS:
-              
-              **FOR WRITING TASKS ONLY:**
-              - You MUST provide a specific "Topic" or "Scenario" for the student to write about.
-              - "practice_prompt" MUST be the actual writing instruction (e.g. "Write an email to...").
-              - "questions" MUST be an empty array [].
-              - "explanation" should focus on tips for this specific writing type (e.g. formal email structure).
-              - DO NOT generate "reading_text" for writing tasks.
-              
-              **FOR ALL OTHER SKILLS (READING, LISTENING, GRAMMAR, SPEAKING, REVIEW/MIXED):**
-              - You MUST provide a FULL context text (150-600 words depending on level).
-              - The text topic MUST be related to one of the student's interests.
-              - For READING: Alternate between "Real World News/Articles" and "Short Stories/Fiction".
-              - For LISTENING: Create dialogue transcripts or podcast-style content.
-              - For GRAMMAR: Create texts that demonstrate the grammar point in context.
-              - For SPEAKING: Create conversation scenarios with example dialogues.
-              - For REVIEW/MIXED: Create comprehensive texts reviewing vocabulary and grammar.
-              - QUESTIONS: Generate 5-10 multiple-choice questions about the text.
-              - VOCABULARY: Extract 5-8 important words/phrases from the text with definitions and context.
-              - "explanation" should be a BRIEF summary or learning objectives (NOT the full text).
-              
-              Respond ONLY with a valid JSON in the following format:
-              
-              FOR WRITING TASKS:
-              {
-                "title": "${task.content?.title}",
-                "explanation": "Tips and structure for this writing type",
-                "examples": ["Example 1", "Example 2"],
-                "practice_prompt": "Specific writing instruction",
-                "questions": []
-              }
-
-              FOR ALL OTHER SKILLS:
-              {
-                "title": "${task.content?.title}",
-                "reading_text": "The complete context text (150-600 words) that students will read/listen to",
-                "vocabulary": [
-                  {
-                    "word": "important word or phrase",
-                    "definition": "clear definition",
-                    "context": "sentence from the text where it appears"
-                  }
-                ],
-                "explanation": "Brief summary or learning objectives (NOT the full text)",
-                "examples": ["Example 1", "Example 2"],
-                "practice_prompt": "Post-reading task instruction",
-                "questions": [
-                  {
-                    "question": "Comprehension question about the reading_text?",
-                    "options": ["A", "B", "C", "D"],
-                    "correct_ans_index": 0
-                  }
-                ]
-              }`
+              content: userPrompt
             }
           ],
           response_format: { type: "json_object" }

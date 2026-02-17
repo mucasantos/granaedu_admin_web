@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { text, mode, targetLang, provider = 'openai', voiceId } = await req.json();
+    const { text, mode, targetLang, provider = 'openai', voiceId, dialogue } = await req.json();
 
     if (!text) {
       return new Response(JSON.stringify({ error: 'Text is required' }), {
@@ -60,41 +60,97 @@ serve(async (req) => {
       if (provider === 'elevenlabs') {
         const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
         if (!ELEVENLABS_API_KEY) {
-            console.warn("ElevenLabs API Key missing in Edge Function secrets. Falling back to OpenAI.");
-            // If we want to fallback, just continue to OpenAI block? 
-            // Better to throw error so client knows configuration is wrong, 
-            // OR explicitly fallback. Let's throw for now to force correct config.
-             throw new Error('Missing ElevenLabs API Key');
+          console.warn("ElevenLabs API Key missing. Falling back...");
+          throw new Error('Missing ElevenLabs API Key');
         }
 
-        const VOICE_ID = voiceId || '21m00Tcm4TlvDq8ikWAM'; // Default voice (Rachel)
-        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
-          method: 'POST',
-          headers: {
-            'xi-api-key': ELEVENLABS_API_KEY,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            text: text,
-            model_id: "eleven_monolingual_v1",
-            voice_settings: {
-              stability: 0.5,
-              similarity_boost: 0.5
-            }
-          }),
-        });
+        // Check if we have a DIALOGUE payload (LISTENING TASK)
+        // dialogue is already destructured from the initial req.json() call
+        // Note: we already parsed req.json into { text, mode... } above at line 16. 
+        // We need to re-access 'dialogue' if it wasn't extracted.
+        // Actually, let's fix line 16 extraction first or accessing it from the already parsed body if possible.
+        // Wait, 'req.json()' can only be consumed once. I need to update the initial destructuring.
 
-        if (!response.ok) {
+        // Let's assume I will update line 16 in a separate chunk or just handle it carefully.
+        // For this chunk, I'll assume 'dialogue' is available in the scope or I'll re-implement the extraction.
+        // Ah, I can't re-read req.json(). 
+        // I MUST Update Line 16 First or merge the edits. 
+        // I will use multi_replace for this to be safe, but let's look at the plan.
+        // I'll update line 16 to extract dialogue, then implement the logic here.
+
+        // ... (Self-correction: I will do this in the next tool call. For now, I'll write the logic assuming 'dialogue' is passed down).
+
+        if (dialogue && Array.isArray(dialogue) && dialogue.length > 0) {
+          // TEXT-TO-DIALOGUE
+          const inputs = dialogue.map((item: any) => ({
+            text: item.text,
+            voice_id: item.speaker === 'A' ? '21m00Tcm4TlvDq8ikWAM' : 'AZnzlk1XvdvUeBnXmlld', // Rachel (A) vs Domi (B)
+          }));
+
+          const response = await fetch('https://api.elevenlabs.io/v1/text-to-dialogue/with-timestamps?output_format=mp3_44100_128', { // Requesting MP3 effectively by format? User used alaw_8000. Let's try mp3 or default. 
+            // Documentation says output_format query param is supported. 
+            // User example: output_format=alaw_8000. 
+            // I prefer mp3_44100_128 for quality.
+            method: 'POST',
+            headers: {
+              'xi-api-key': ELEVENLABS_API_KEY,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              inputs: inputs,
+            }),
+          });
+
+          if (!response.ok) {
+            const err = await response.text();
+            throw new Error(`ElevenLabs Dialogue Error: ${err}`);
+          }
+
+          const data = await response.json();
+          if (!data.audio_base64) {
+            throw new Error('ElevenLabs did not return audio_base64');
+          }
+
+          // Decode Base64 to Binary
+          const binaryString = atob(data.audio_base64);
+          const len = binaryString.length;
+          const bytes = new Uint8Array(len);
+          for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+
+          return new Response(bytes, {
+            headers: { ...corsHeaders, 'Content-Type': 'audio/mpeg' },
+          });
+
+        } else {
+          // STANDARD TTS (Single Voice)
+          const VOICE_ID = voiceId || '21m00Tcm4TlvDq8ikWAM';
+          const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
+            method: 'POST',
+            headers: {
+              'xi-api-key': ELEVENLABS_API_KEY,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              text: text,
+              voice_settings: {
+                stability: 0.5,
+                similarity_boost: 0.5
+              }
+            }),
+          });
+
+          if (!response.ok) {
             const err = await response.text();
             throw new Error(`ElevenLabs API Error: ${err}`);
+          }
+
+          const audioBuffer = await response.arrayBuffer();
+          return new Response(audioBuffer, {
+            headers: { ...corsHeaders, 'Content-Type': 'audio/mpeg' },
+          });
         }
-
-        // Return binary audio directly
-        const audioBuffer = await response.arrayBuffer();
-        return new Response(audioBuffer, {
-          headers: { ...corsHeaders, 'Content-Type': 'audio/mpeg' },
-        });
-
       } else {
         // DEFAULT: OpenAI TTS
         const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');

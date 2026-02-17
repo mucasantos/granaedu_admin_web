@@ -53,8 +53,13 @@ serve(async (req: Request) => {
     const topic = formData.get('topic') as string || 'General';
     const durationStr = formData.get('duration') as string || '0';
     const userId = formData.get('user_id') as string || 'anonymous';
+    const taskId = formData.get('task_id') as string || null; // Read Task ID
 
-    console.log(`[speaking-analyzer] User ID from form: ${userId}`);
+    console.log(`[speaking-analyzer] User ID: ${userId}, Task ID: ${taskId}`);
+
+    // ... (rest of code)
+
+
 
     if (!audioFile) {
         return new Response(JSON.stringify({ error: 'Audio file is required' }), { status: 400, headers: corsHeaders });
@@ -213,22 +218,24 @@ serve(async (req: Request) => {
       }
 
       // 6. Save Submission to Database
+      // Note: transcription key from Gemini might be 'transcript' or 'transcription'
+      const transcriptText = resultJson.transcript || resultJson.transcription || '';
+
       const { data: submissionData, error: dbError } = await supabase
         .from('speaking_submissions')
         .insert({
           user_id: userId,
+          task_id: taskId,
           audio_url: publicUrl,
-          transcript: resultJson.transcript || '',
+          transcript: transcriptText,
           analysis_json: resultJson,
+          score: resultJson.scores?.overall || 0, // Save explicit score!
         })
         .select('id')
         .single();
 
       if (dbError) {
         console.error('[speaking-analyzer] DB Insert Error:', dbError);
-      } else {
-        submissionId = submissionData?.id;
-        console.log('[speaking-analyzer] Submission saved with ID:', submissionId);
       }
     } else {
       console.log('[speaking-analyzer] Anonymous user - skipping storage & database save');
@@ -239,6 +246,7 @@ serve(async (req: Request) => {
     return new Response(JSON.stringify({ ...resultJson, submission_id: submissionId }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
+
 
   } catch (error) {
     console.error('[speaking-analyzer] Internal Error:', error);

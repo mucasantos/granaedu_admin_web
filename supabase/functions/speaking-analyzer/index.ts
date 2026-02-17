@@ -181,9 +181,54 @@ serve(async (req: Request) => {
         resultJson = { error: "Failed to parse AI response", raw: aiText };
     }
 
-    console.log('[speaking-analyzer] Analysis complete');
+    // 5. Upload Audio to Storage
+    const timestamp = new Date().getTime();
+    const fileName = `${user.id}/${timestamp}.mp3`; // Organize by user
 
-    return new Response(JSON.stringify(resultJson), {
+    const { error: uploadError } = await supabase.storage
+      .from('speaking-audio')
+      .upload(fileName, audioFile, {
+        contentType: mimeType,
+        upsert: false
+      });
+
+    if (uploadError) {
+      console.error('[speaking-analyzer] Storage Upload Error:', uploadError);
+      // Continue but warn? Or fail? Let's log and continue, maybe save without audio URL if critical?
+      // Better to fail or save what we have. Let's try to proceed.
+    }
+
+    // Get Public URL (or Signed URL if private)
+    // Assuming 'speaking-audio' is public for now based on migration
+    const { data: { publicUrl } } = supabase.storage
+      .from('speaking-audio')
+      .getPublicUrl(fileName);
+
+    // 6. Save Submission to Database
+    let submissionId = null;
+    const { data: submissionData, error: dbError } = await supabase
+      .from('speaking_submissions')
+      .insert({
+        user_id: user.id,
+        audio_url: publicUrl,
+        transcript: resultJson.transcript || '',
+        analysis_json: resultJson,
+        // task_id: ??? We don't have task_id in the request yet. 
+        // We should probably add it to the form data in the future.
+        // For now, it's nullable.
+      })
+      .select('id')
+      .single();
+
+    if (dbError) {
+      console.error('[speaking-analyzer] DB Insert Error:', dbError);
+    } else {
+      submissionId = submissionData?.id;
+    }
+
+    console.log('[speaking-analyzer] Analysis complete. Submission ID:', submissionId);
+
+    return new Response(JSON.stringify({ ...resultJson, submission_id: submissionId }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 

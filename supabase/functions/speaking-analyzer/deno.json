@@ -1,7 +1,7 @@
 {
   "imports": {},
   "functions": {
-    "reading-assistant": {
+    "speaking-analyzer": {
       "verify_jwt": false
     }
   }

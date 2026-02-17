@@ -655,11 +655,11 @@ serve(async (req: Request) => {
               - Interests: ${Array.isArray(userInterests) ? userInterests.join(', ') : ''}
 
               CRITICAL INSTRUCTIONS:
-              - Generate a **Dialogue Script** between two speakers (Speaker A and Speaker B).
+              - Generate a **Dialogue Script** between two speakers (Give them names, e.g., "Liam", "Sophia", "Carlos", "Yuki").
               - The dialogue should be natural, engaging, and relevant to the topic.
-              - "reading_text" must be the FULL concatenated text of the dialogue suitable for a narrator.
-              - "dialogue" must be an array of objects: { "speaker": "A", "text": "..." }.
-              - "questions" should be about the dialogue content.
+              - "reading_text" must be the FULL concatenated text of the dialogue suitable for a narrator (e.g., "Liam: Hello. Sophia: Hi there.").
+              - "dialogue" must be an array of objects: { "speaker": "Name", "text": "..." }.
+              - "questions" should be about the dialogue content. Use the characters' names in the questions.
               - "explanation" should be a brief intro/context.
 
               Respond ONLY with a valid JSON:
@@ -667,8 +667,8 @@ serve(async (req: Request) => {
                 "title": "${task.content?.title}",
                 "reading_text": "Full text of dialogue...",
                 "dialogue": [
-                  { "speaker": "A", "text": "Hello." },
-                  { "speaker": "B", "text": "Hi there." }
+                  { "speaker": "Liam", "text": "Hello." },
+                  { "speaker": "Sophia", "text": "Hi there." }
                 ],
                 "vocabulary": [
                    { "word": "term", "definition": "def", "context": "example" }
@@ -676,7 +676,7 @@ serve(async (req: Request) => {
                 "explanation": "Brief context...",
                 "questions": [
                   {
-                    "question": "What did A say?",
+                    "question": "What did Liam say?",
                     "options": ["A", "B", "C", "D"],
                     "correct_ans_index": 0
                   }

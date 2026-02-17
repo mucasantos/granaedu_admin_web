@@ -1,5 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import { crypto } from "https://deno.land/std@0.177.0/crypto/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,8 +17,8 @@ serve(async (req) => {
   try {
     const { text, mode, targetLang, provider = 'openai', voiceId, dialogue } = await req.json();
 
-    if (!text) {
-      return new Response(JSON.stringify({ error: 'Text is required' }), {
+    if (!text && (!dialogue || dialogue.length === 0)) {
+      return new Response(JSON.stringify({ error: 'Text or Dialogue is required' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -55,8 +57,50 @@ serve(async (req) => {
 
     // MODE: TTS (Text-to-Speech)
     if (mode === 'tts') {
-      // Provider selection: 'openai' or 'elevenlabs'
-      
+      // 1. Initialize Supabase Admin Client for Storage
+      const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+      const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+      // 2. Determine Content for Hashing
+      let contentToHash = '';
+      if (dialogue && Array.isArray(dialogue) && dialogue.length > 0) {
+        contentToHash = JSON.stringify(dialogue);
+      } else {
+        contentToHash = text + (voiceId || 'default');
+      }
+
+      // 3. Generate Hash (MD5)
+      const encoder = new TextEncoder();
+      const data = encoder.encode(contentToHash);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data); // Use SHA-256 as it's standard in Web Crypto
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      const fileName = `${hashHex}.mp3`;
+
+      // 4. Check if file exists in Storage by listing
+      const { data: listData, error: listError } = await supabase
+        .storage
+        .from('listening-audio')
+        .list('', { search: fileName });
+
+      if (!listError && listData && listData.length > 0) {
+        console.log(`Audio found in cache: ${fileName}`);
+        const { data: signedUrlData } = await supabase
+          .storage
+          .from('listening-audio')
+          .createSignedUrl(fileName, 60 * 60 * 24 * 365); // 1 year
+
+        return new Response(JSON.stringify({ audioUrl: signedUrlData?.signedUrl }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      console.log(`Audio NOT found in cache. Generating new...`);
+
+      // 5. Generate Audio via ElevenLabs
+      let audioBuffer: ArrayBuffer;
+
       if (provider === 'elevenlabs') {
         const ELEVENLABS_API_KEY = Deno.env.get('ELEVENLABS_API_KEY');
         if (!ELEVENLABS_API_KEY) {
@@ -82,15 +126,22 @@ serve(async (req) => {
 
         if (dialogue && Array.isArray(dialogue) && dialogue.length > 0) {
           // TEXT-TO-DIALOGUE
+          // 1. Identify Unique Speakers
+          const speakers = [...new Set(dialogue.map((item: any) => item.speaker))];
+          const voiceMap: Record<string, string> = {};
+
+          // Map first speaker to Rachel (Female), second to Domi (Male/Deep), others fallback
+          // Ideally rely on gender detection or just alternate using a few predefined voices.
+          // For now, let's keep it simple: Spk1 -> Rachel, Spk2 -> Domi
+          if (speakers.length > 0) voiceMap[speakers[0]] = '21m00Tcm4TlvDq8ikWAM'; // Rachel
+          if (speakers.length > 1) voiceMap[speakers[1]] = 'AZnzlk1XvdvUeBnXmlld'; // Domi
+
           const inputs = dialogue.map((item: any) => ({
             text: item.text,
-            voice_id: item.speaker === 'A' ? '21m00Tcm4TlvDq8ikWAM' : 'AZnzlk1XvdvUeBnXmlld', // Rachel (A) vs Domi (B)
+            voice_id: voiceMap[item.speaker] || '21m00Tcm4TlvDq8ikWAM', // Fallback to Rachel
           }));
 
-          const response = await fetch('https://api.elevenlabs.io/v1/text-to-dialogue/with-timestamps?output_format=mp3_44100_128', { // Requesting MP3 effectively by format? User used alaw_8000. Let's try mp3 or default. 
-            // Documentation says output_format query param is supported. 
-            // User example: output_format=alaw_8000. 
-            // I prefer mp3_44100_128 for quality.
+          const response = await fetch('https://api.elevenlabs.io/v1/text-to-dialogue/with-timestamps?output_format=mp3_44100_128', {
             method: 'POST',
             headers: {
               'xi-api-key': ELEVENLABS_API_KEY,
@@ -114,14 +165,11 @@ serve(async (req) => {
           // Decode Base64 to Binary
           const binaryString = atob(data.audio_base64);
           const len = binaryString.length;
-          const bytes = new Uint8Array(len);
+          audioBuffer = new Uint8Array(len).buffer;
+          const bytes = new Uint8Array(audioBuffer);
           for (let i = 0; i < len; i++) {
             bytes[i] = binaryString.charCodeAt(i);
           }
-
-          return new Response(bytes, {
-            headers: { ...corsHeaders, 'Content-Type': 'audio/mpeg' },
-          });
 
         } else {
           // STANDARD TTS (Single Voice)
@@ -146,11 +194,41 @@ serve(async (req) => {
             throw new Error(`ElevenLabs API Error: ${err}`);
           }
 
-          const audioBuffer = await response.arrayBuffer();
-          return new Response(audioBuffer, {
-            headers: { ...corsHeaders, 'Content-Type': 'audio/mpeg' },
-          });
+          audioBuffer = await response.arrayBuffer();
         }
+
+        // 6. Upload to Storage
+        const { error: uploadError } = await supabase
+          .storage
+          .from('listening-audio')
+          .upload(fileName, audioBuffer, {
+            contentType: 'audio/mpeg',
+            upsert: true
+          });
+
+        if (uploadError) {
+          console.error('Upload Error:', uploadError);
+          // Fallback: return binary directly if upload fails?
+          // Or just throw. Let's return binary as fallback if upload fails, 
+          // BUT wait, we want to unify the response format.
+          // If upload fails, we can't give a URL. 
+          // Let's THROW for now to ensure we fix storage permissions if needed.
+          throw new Error(`Failed to upload audio to storage: ${uploadError.message}`);
+        }
+
+        const { data: signedUrlData, error: signError } = await supabase
+          .storage
+          .from('listening-audio')
+          .createSignedUrl(fileName, 60 * 60 * 24 * 365);
+
+        if (signError || !signedUrlData) {
+          throw new Error(`Failed to create signed URL: ${signError?.message}`);
+        }
+
+        return new Response(JSON.stringify({ audioUrl: signedUrlData.signedUrl }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+
       } else {
         // DEFAULT: OpenAI TTS
         const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
@@ -176,9 +254,30 @@ serve(async (req) => {
             throw new Error(`OpenAI TTS Error: ${err}`);
         }
 
-        const audioBuffer = await response.arrayBuffer();
-        return new Response(audioBuffer, {
-          headers: { ...corsHeaders, 'Content-Type': 'audio/mpeg' },
+        audioBuffer = await response.arrayBuffer();
+
+        // Upload OpenAI Audio too
+        const { error: uploadError } = await supabase
+          .storage
+          .from('listening-audio')
+          .upload(fileName, audioBuffer, {
+            contentType: 'audio/mpeg',
+            upsert: true
+          });
+
+        if (uploadError) throw new Error(`Storage Upload Error: ${uploadError.message}`);
+
+        const { data: signedUrlData, error: signError } = await supabase
+          .storage
+          .from('listening-audio')
+          .createSignedUrl(fileName, 60 * 60 * 24 * 365);
+
+        if (signError || !signedUrlData) {
+          throw new Error(`Failed to create signed URL: ${signError?.message}`);
+        }
+
+        return new Response(JSON.stringify({ audioUrl: signedUrlData.signedUrl }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
     }

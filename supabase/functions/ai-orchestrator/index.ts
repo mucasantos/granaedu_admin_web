@@ -25,8 +25,7 @@ serve(async (req: Request) => {
 
     console.log(`[ai-orchestrator] Action: ${action}, User ID: ${user_id}`);
 
-    // Fallback for migration compatibility
-    const targetUserId = user_id || body.firebase_uid;
+    const targetUserId = user_id;
 
     if (!targetUserId) {
       console.error('[ai-orchestrator] No user ID provided');
@@ -656,14 +655,39 @@ serve(async (req: Request) => {
                 - The text topic MUST be related to one of the student's interests.
                 - For READING: Alternate between "Real World News/Articles" usage and "Short Stories/Fiction".
                 - QUESTIONS: You MUST generate EXACTLY 10 multiple-choice questions for reading comprehension.
+                - VOCABULARY: Extract 5-8 important words/phrases from the text with definitions and context.
               - If the skill is NOT "reading" AND NOT "writing":
                 - Provide 3-5 questions.
               - Provide an "explanation", "examples" (array), a "practice_prompt".
               
               Respond ONLY with a valid JSON in the following format:
+
+              FOR READING TASKS:
               {
-                "title": "${task.content?.title}", // You may slightly improve the title to be more catchy if needed
-                "explanation": "Deep theoretical explanation OR The Full Reading Text",
+                "title": "${task.content?.title}",
+                "reading_text": "The complete reading passage (150-600 words)",
+                "vocabulary": [
+                  {
+                    "word": "important word or phrase",
+                    "definition": "clear definition",
+                    "context": "sentence from the text where it appears"
+                  }
+                ],
+                "explanation": "Brief summary or learning objectives for this reading",
+                "practice_prompt": "Post-reading task instruction",
+                "questions": [
+                  {
+                    "question": "Comprehension question?",
+                    "options": ["A", "B", "C", "D"],
+                    "correct_ans_index": 0
+                  }
+                ]
+              }
+
+              FOR OTHER TASKS:
+              {
+                "title": "${task.content?.title}",
+                "explanation": "Deep theoretical explanation",
                 "examples": ["example 1", "example 2"],
                 "practice_prompt": "Specific instruction for the student to practice this skill",
                 "questions": [
@@ -842,6 +866,9 @@ serve(async (req: Request) => {
     }
 
     if (action === 'recommend_youtube_content') {
+      const userProfile = await getProfile();
+      if (!userProfile) throw new Error('User profile required for this action');
+
       const userLevel = userProfile.level || 'A1';
       const userInterests = userProfile.interests || ['General English'];
 

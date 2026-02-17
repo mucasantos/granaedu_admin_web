@@ -31,42 +31,30 @@ serve(async (req: Request) => {
       return new Response(JSON.stringify({ error: 'Content-Type must be multipart/form-data' }), { status: 400, headers: corsHeaders });
     }
 
-    // 2. Authenticate User
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Missing Authorization header' }), { status: 401, headers: corsHeaders });
-    }
-
+    // 2. Initialize Supabase client with SERVICE ROLE (bypasses RLS)
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!supabaseUrl || !supabaseServiceKey) {
         throw new Error("Missing Supabase configuration");
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, { auth: { persistSession: false } });
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false
+      } 
+    });
 
-    // Try to get user if authenticated, but don't require it
-    let userId = 'anonymous';
-    try {
-      const accessToken = authHeader.replace(/^Bearer\s+/i, '').trim();
-      const { data: { user } } = await supabase.auth.getUser(accessToken);
-      if (user) {
-        userId = user.id;
-        console.log(`[speaking-analyzer] User authenticated: ${userId}`);
-      } else {
-        console.log('[speaking-analyzer] No user authenticated, using anonymous mode');
-      }
-    } catch (authError) {
-      console.log('[speaking-analyzer] Auth check failed, using anonymous mode:', authError);
-    }
-
-    // 3. Extract Data
+    //3. Extract Data (including user_id from form)
     const formData = await req.formData();
     const audioFile = formData.get('audio') as File;
     const userLevel = formData.get('level') as string || 'A1';
     const topic = formData.get('topic') as string || 'General';
-    const durationStr = formData.get('duration') as string || '0'; // Duration in seconds if available
+    const durationStr = formData.get('duration') as string || '0';
+    const userId = formData.get('user_id') as string || 'anonymous';
+
+    console.log(`[speaking-analyzer] User ID from form: ${userId}`);
 
     if (!audioFile) {
         return new Response(JSON.stringify({ error: 'Audio file is required' }), { status: 400, headers: corsHeaders });
@@ -78,16 +66,25 @@ serve(async (req: Request) => {
         return new Response(JSON.stringify({ error: 'Audio file too large (Max 10MB)' }), { status: 400, headers: corsHeaders });
     }
 
+
     // 4. Prepare Gemini Call
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
     if (!geminiApiKey) {
         throw new Error("GEMINI_API_KEY is not configured");
     }
 
-    // Convert audio to Base64
+    // Convert audio to Base64 - FIXED: Use chunked conversion to avoid call stack overflow
     const audioBuffer = await audioFile.arrayBuffer();
     const audioBytes = new Uint8Array(audioBuffer);
-    const audioBase64 = btoa(String.fromCharCode(...audioBytes));
+
+    // Convert to base64 in chunks to avoid "Maximum call stack size exceeded"
+    let binary = '';
+    const chunkSize = 8192; // Process 8KB at a time
+    for (let i = 0; i < audioBytes.length; i += chunkSize) {
+      const chunk = audioBytes.slice(i, i + chunkSize);
+      binary += String.fromCharCode.apply(null, Array.from(chunk));
+    }
+    const audioBase64 = btoa(binary);
     
     // Determine MIME type
     let mimeType = audioFile.type || 'audio/mp3'; // Default fallback
@@ -188,49 +185,53 @@ serve(async (req: Request) => {
         resultJson = { error: "Failed to parse AI response", raw: aiText };
     }
 
-    // 5. Upload Audio to Storage
-    const timestamp = new Date().getTime();
-    const fileName = `${user.id}/${timestamp}.mp3`; // Organize by user
-
-    const { error: uploadError } = await supabase.storage
-      .from('speaking-audio')
-      .upload(fileName, audioFile, {
-        contentType: mimeType,
-        upsert: false
-      });
-
-    if (uploadError) {
-      console.error('[speaking-analyzer] Storage Upload Error:', uploadError);
-      // Continue but warn? Or fail? Let's log and continue, maybe save without audio URL if critical?
-      // Better to fail or save what we have. Let's try to proceed.
-    }
-
-    // Get Public URL (or Signed URL if private)
-    // Assuming 'speaking-audio' is public for now based on migration
-    const { data: { publicUrl } } = supabase.storage
-      .from('speaking-audio')
-      .getPublicUrl(fileName);
-
-    // 6. Save Submission to Database
+    // 5. Upload Audio to Storage & Save to DB (ONLY if user is authenticated)
     let submissionId = null;
-    const { data: submissionData, error: dbError } = await supabase
-      .from('speaking_submissions')
-      .insert({
-        user_id: user.id,
-        audio_url: publicUrl,
-        transcript: resultJson.transcript || '',
-        analysis_json: resultJson,
-        // task_id: ??? We don't have task_id in the request yet. 
-        // We should probably add it to the form data in the future.
-        // For now, it's nullable.
-      })
-      .select('id')
-      .single();
+    let publicUrl = null;
 
-    if (dbError) {
-      console.error('[speaking-analyzer] DB Insert Error:', dbError);
+    if (userId !== 'anonymous') {
+      // User is authenticated, save everything
+      const timestamp = new Date().getTime();
+      const fileName = `${userId}/${timestamp}.mp3`; // Organize by user
+
+      const { error: uploadError } = await supabase.storage
+        .from('speaking-audio')
+        .upload(fileName, audioFile, {
+          contentType: mimeType,
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('[speaking-analyzer] Storage Upload Error:', uploadError);
+        // Continue without audio URL
+      } else {
+        // Get Public URL
+        const { data: { publicUrl: url } } = supabase.storage
+          .from('speaking-audio')
+          .getPublicUrl(fileName);
+        publicUrl = url;
+      }
+
+      // 6. Save Submission to Database
+      const { data: submissionData, error: dbError } = await supabase
+        .from('speaking_submissions')
+        .insert({
+          user_id: userId,
+          audio_url: publicUrl,
+          transcript: resultJson.transcript || '',
+          analysis_json: resultJson,
+        })
+        .select('id')
+        .single();
+
+      if (dbError) {
+        console.error('[speaking-analyzer] DB Insert Error:', dbError);
+      } else {
+        submissionId = submissionData?.id;
+        console.log('[speaking-analyzer] Submission saved with ID:', submissionId);
+      }
     } else {
-      submissionId = submissionData?.id;
+      console.log('[speaking-analyzer] Anonymous user - skipping storage & database save');
     }
 
     console.log('[speaking-analyzer] Analysis complete. Submission ID:', submissionId);

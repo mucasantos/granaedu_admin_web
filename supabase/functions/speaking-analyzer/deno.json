@@ -2,7 +2,8 @@
   "imports": {},
   "functions": {
     "speaking-analyzer": {
-      "verify_jwt": false
+      "verify_jwt": false,
+      "import_map": false
     }
   }
 }

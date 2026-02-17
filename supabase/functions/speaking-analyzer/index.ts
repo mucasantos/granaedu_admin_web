@@ -45,14 +45,21 @@ serve(async (req: Request) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey, { auth: { persistSession: false } });
-    const accessToken = authHeader.replace(/^Bearer\s+/i, '').trim();
-    const { data: { user }, error: authError } = await supabase.auth.getUser(accessToken);
 
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized', details: authError?.message }), { status: 401, headers: corsHeaders });
+    // Try to get user if authenticated, but don't require it
+    let userId = 'anonymous';
+    try {
+      const accessToken = authHeader.replace(/^Bearer\s+/i, '').trim();
+      const { data: { user } } = await supabase.auth.getUser(accessToken);
+      if (user) {
+        userId = user.id;
+        console.log(`[speaking-analyzer] User authenticated: ${userId}`);
+      } else {
+        console.log('[speaking-analyzer] No user authenticated, using anonymous mode');
+      }
+    } catch (authError) {
+      console.log('[speaking-analyzer] Auth check failed, using anonymous mode:', authError);
     }
-
-    console.log(`[speaking-analyzer] User authenticated: ${user.id}`);
 
     // 3. Extract Data
     const formData = await req.formData();

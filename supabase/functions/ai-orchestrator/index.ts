@@ -645,27 +645,41 @@ serve(async (req: Request) => {
               - Student Interests: ${Array.isArray(userInterests) ? userInterests.join(', ') : ''}
 
               CRITICAL INSTRUCTIONS:
-              - If the skill is "writing":
-                - You MUST provide a specific "Topic" or "Scenario" for the student to write about.
-                - "practice_prompt" MUST be the actual writing instruction (e.g. "Write an email to...").
-                - "questions" MUST be an empty array [].
-                - "explanation" should focus on tips for this specific writing type (e.g. formal email structure).
-              - If the skill is "reading":
-                - You MUST provide the FULL text to read (150-600 words depending on level).
-                - The text topic MUST be related to one of the student's interests.
-                - For READING: Alternate between "Real World News/Articles" usage and "Short Stories/Fiction".
-                - QUESTIONS: You MUST generate EXACTLY 10 multiple-choice questions for reading comprehension.
-                - VOCABULARY: Extract 5-8 important words/phrases from the text with definitions and context.
-              - If the skill is NOT "reading" AND NOT "writing":
-                - Provide 3-5 questions.
-              - Provide an "explanation", "examples" (array), a "practice_prompt".
+              
+              **FOR WRITING TASKS ONLY:**
+              - You MUST provide a specific "Topic" or "Scenario" for the student to write about.
+              - "practice_prompt" MUST be the actual writing instruction (e.g. "Write an email to...").
+              - "questions" MUST be an empty array [].
+              - "explanation" should focus on tips for this specific writing type (e.g. formal email structure).
+              - DO NOT generate "reading_text" for writing tasks.
+              
+              **FOR ALL OTHER SKILLS (READING, LISTENING, GRAMMAR, SPEAKING, REVIEW/MIXED):**
+              - You MUST provide a FULL context text (150-600 words depending on level).
+              - The text topic MUST be related to one of the student's interests.
+              - For READING: Alternate between "Real World News/Articles" and "Short Stories/Fiction".
+              - For LISTENING: Create dialogue transcripts or podcast-style content.
+              - For GRAMMAR: Create texts that demonstrate the grammar point in context.
+              - For SPEAKING: Create conversation scenarios with example dialogues.
+              - For REVIEW/MIXED: Create comprehensive texts reviewing vocabulary and grammar.
+              - QUESTIONS: Generate 5-10 multiple-choice questions about the text.
+              - VOCABULARY: Extract 5-8 important words/phrases from the text with definitions and context.
+              - "explanation" should be a BRIEF summary or learning objectives (NOT the full text).
               
               Respond ONLY with a valid JSON in the following format:
-
-              FOR READING TASKS:
+              
+              FOR WRITING TASKS:
               {
                 "title": "${task.content?.title}",
-                "reading_text": "The complete reading passage (150-600 words)",
+                "explanation": "Tips and structure for this writing type",
+                "examples": ["Example 1", "Example 2"],
+                "practice_prompt": "Specific writing instruction",
+                "questions": []
+              }
+
+              FOR ALL OTHER SKILLS:
+              {
+                "title": "${task.content?.title}",
+                "reading_text": "The complete context text (150-600 words) that students will read/listen to",
                 "vocabulary": [
                   {
                     "word": "important word or phrase",
@@ -673,26 +687,12 @@ serve(async (req: Request) => {
                     "context": "sentence from the text where it appears"
                   }
                 ],
-                "explanation": "Brief summary or learning objectives for this reading",
+                "explanation": "Brief summary or learning objectives (NOT the full text)",
+                "examples": ["Example 1", "Example 2"],
                 "practice_prompt": "Post-reading task instruction",
                 "questions": [
                   {
-                    "question": "Comprehension question?",
-                    "options": ["A", "B", "C", "D"],
-                    "correct_ans_index": 0
-                  }
-                ]
-              }
-
-              FOR OTHER TASKS:
-              {
-                "title": "${task.content?.title}",
-                "explanation": "Deep theoretical explanation",
-                "examples": ["example 1", "example 2"],
-                "practice_prompt": "Specific instruction for the student to practice this skill",
-                "questions": [
-                  {
-                    "question": "Question text?",
+                    "question": "Comprehension question about the reading_text?",
                     "options": ["A", "B", "C", "D"],
                     "correct_ans_index": 0
                   }

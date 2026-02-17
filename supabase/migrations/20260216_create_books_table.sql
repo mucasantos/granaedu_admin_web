@@ -13,16 +13,19 @@ CREATE TABLE IF NOT EXISTS public.books (
 ALTER TABLE public.books ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Everyone can read books (Global Library)
+DROP POLICY IF EXISTS "Allow public read access" ON public.books;
 CREATE POLICY "Allow public read access" ON public.books
     FOR SELECT
     USING (true);
 
 -- Policy: Only admins/teachers can insert/update (simplified for now, allows authenticated)
+DROP POLICY IF EXISTS "Allow authenticated insert" ON public.books;
 CREATE POLICY "Allow authenticated insert" ON public.books
     FOR INSERT
     TO authenticated
     WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Allow authenticated update" ON public.books;
 CREATE POLICY "Allow authenticated update" ON public.books
     FOR UPDATE
     TO authenticated
@@ -42,18 +45,21 @@ CREATE TABLE IF NOT EXISTS public.class_books (
 ALTER TABLE public.class_books ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Authenticated users can read (Teachers/Students)
+DROP POLICY IF EXISTS "Allow authenticated read class_books" ON public.class_books;
 CREATE POLICY "Allow authenticated read class_books" ON public.class_books
     FOR SELECT
     TO authenticated
     USING (true);
 
 -- Policy: Teachers can assign books
+DROP POLICY IF EXISTS "Allow authenticated insert class_books" ON public.class_books;
 CREATE POLICY "Allow authenticated insert class_books" ON public.class_books
     FOR INSERT
     TO authenticated
     WITH CHECK (true);
 
 -- Policy: Teachers can unassign books
+DROP POLICY IF EXISTS "Allow authenticated delete class_books" ON public.class_books;
 CREATE POLICY "Allow authenticated delete class_books" ON public.class_books
     FOR DELETE
     TO authenticated

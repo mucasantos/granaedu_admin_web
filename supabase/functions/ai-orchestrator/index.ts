@@ -491,12 +491,14 @@ serve(async (req: Request) => {
       const planData = JSON.parse(aiResult.choices[0].message.content);
 
       // 3. Save to Database
-      // Create Weekly Plan
+      // Create Weekly Plan with CURRENT date as week_start
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+
       const { data: plan, error: planError } = await supabase
         .from('weekly_plans')
         .insert({
           user_id: userProfile.id, // Use the resolved profile ID
-          week_start: planData.week_start,
+          week_start: today, // ✅ FIX: Always use today's date
           level: planData.level,
           focus: planData.focus,
           logic: planData.logic

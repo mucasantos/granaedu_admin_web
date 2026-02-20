@@ -891,14 +891,35 @@ serve(async (req: Request) => {
         .order('created_at', { ascending: false })
         .limit(5);
 
-      let recoveryMode = false;
+      let recoveryActive = false;
+      let message = 'Keep up the great work!';
+      let recommendations: string[] = [];
+
       if (quizzes && quizzes.length >= 3) {
         const avgScore = quizzes.reduce((sum: number, q: any) => sum + q.score, 0) / quizzes.length;
-        if (avgScore < 60) recoveryMode = true;
+        console.log(`🩹 Recovery Check - User: ${userProfile.id}, Quizzes: ${quizzes.length}, Avg Score: ${avgScore}`);
+
+        if (avgScore < 60) {
+          recoveryActive = true;
+          message = 'Time to get back on track! We\'ve adapted your plan for easy recovery.';
+          recommendations = [
+            'Start with easier tasks',
+            'Review fundamentals',
+            'Practice daily for 10 minutes',
+            'Focus on your weakest areas'
+          ];
+        }
+      } else {
+        console.log(`🩹 Recovery Check - User: ${userProfile.id}, Not enough quizzes (${quizzes?.length || 0})`);
       }
 
       return new Response(
-        JSON.stringify({ success: true, recovery_mode: recoveryMode }),
+        JSON.stringify({
+          success: true,
+          recovery_active: recoveryActive,
+          message: message,
+          recommendations: recommendations
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

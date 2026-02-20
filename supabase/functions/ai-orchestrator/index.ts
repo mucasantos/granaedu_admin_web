@@ -494,19 +494,57 @@ serve(async (req: Request) => {
       // Create Weekly Plan with CURRENT date as week_start
       const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
 
-      const { data: plan, error: planError } = await supabase
+      // ✅ Check if a plan already exists for today
+      const { data: existingPlan } = await supabase
         .from('weekly_plans')
-        .insert({
-          user_id: userProfile.id, // Use the resolved profile ID
-          week_start: today, // ✅ FIX: Always use today's date
-          level: planData.level,
-          focus: planData.focus,
-          logic: planData.logic
-        })
-        .select()
-        .single()
+        .select('id')
+        .eq('user_id', userProfile.id)
+        .eq('week_start', today)
+        .maybeSingle();
 
-      if (planError) throw planError;
+      let plan;
+
+      if (existingPlan) {
+        // Update existing plan instead of creating duplicate
+        console.log(`⚠️ Plan already exists for ${userProfile.name} on ${today}. Updating...`);
+
+        const { data: updatedPlan, error: updateError } = await supabase
+          .from('weekly_plans')
+          .update({
+            level: planData.level,
+            focus: planData.focus,
+            logic: planData.logic
+          })
+          .eq('id', existingPlan.id)
+          .select()
+          .single();
+
+        if (updateError) throw updateError;
+
+        // Delete old tasks for this plan
+        await supabase
+          .from('daily_tasks')
+          .delete()
+          .eq('plan_id', existingPlan.id);
+
+        plan = updatedPlan;
+      } else {
+        // Create new plan
+        const { data: newPlan, error: planError } = await supabase
+          .from('weekly_plans')
+          .insert({
+            user_id: userProfile.id,
+            week_start: today,
+            level: planData.level,
+            focus: planData.focus,
+            logic: planData.logic
+          })
+          .select()
+          .single();
+
+        if (planError) throw planError;
+        plan = newPlan;
+      }
 
       // Create Daily Tasks
       const tasksToInsert = planData.tasks.map((t: any) => ({

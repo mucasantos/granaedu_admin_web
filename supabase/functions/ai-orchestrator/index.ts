@@ -416,6 +416,161 @@ serve(async (req: Request) => {
       return new Response(JSON.stringify({ success: true, ...content }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
+    // ============================================================================
+    // ADAPTIVE WEEKLY PLAN - Conditional Regeneration (Phase 2)
+    // ============================================================================
+    if (action === 'generate_adaptive_weekly_plan') {
+      const activeGeminiKey = await getGeminiKey();
+      if (!activeGeminiKey) throw new Error('Gemini API Key is required');
+
+      const { week_start, snapshot_id, profile, user_level, user_goal, user_interests, regeneration_reason } = body;
+
+      if (!profile) throw new Error('User profile required for adaptive plan generation');
+
+      console.log(`[generate_adaptive_weekly_plan] Generating adaptive plan for user ${user_id}`);
+      console.log(`[generate_adaptive_weekly_plan] Reason: ${regeneration_reason}`);
+      console.log(`[generate_adaptive_weekly_plan] FI: ${profile.fluency_index}, Primary: ${profile.primary_skill}`);
+
+      const ADAPTIVE_PLAN_PROMPT = `You are an expert adaptive English learning curriculum designer.
+
+Student Profile:
+- Fluency Index: ${profile.fluency_index}/100
+- Primary Weakness: ${profile.primary_skill} (lowest score - needs most focus)
+- Secondary Weakness: ${profile.secondary_skill}
+- Individual Scores:
+  * Grammar: ${profile.grammar_score}/100
+  * Fluency: ${profile.fluency_score}/100
+  * Vocabulary: ${profile.vocabulary_score}/100
+  * Speaking: ${profile.speaking_score}/100
+  * Listening: ${profile.listening_score}/100
+- Level: ${user_level}
+- Goal: ${user_goal}
+- Interests: ${Array.isArray(user_interests) ? user_interests.join(', ') : 'general topics'}
+
+Regeneration Reason: ${regeneration_reason}
+
+CRITICAL INSTRUCTIONS:
+1. Generate a 7-day adaptive learning plan focused on improving the PRIMARY WEAKNESS (${profile.primary_skill}).
+2. Structure:
+   - Day 1: Speaking Task (focus on ${profile.primary_skill})
+   - Day 2: Grammar Reinforcement (if grammar is weak) OR Vocabulary Expansion
+   - Day 3: Listening Task
+   - Day 4: Speaking Task (focus on ${profile.secondary_skill})
+   - Day 5: Vocabulary Expansion OR Reading
+   - Day 6: Review Day (mixed skills)
+   - Day 7: Re-evaluation Speaking (comprehensive assessment)
+
+3. Task difficulty should match current Fluency Index:
+   - FI 0-30: "easy"
+   - FI 31-60: "medium"
+   - FI 61-100: "hard"
+
+4. Each task should have:
+   - Clear title related to student interests
+   - Appropriate task_type: "speaking", "grammar", "vocabulary", "listening", "reading", "review"
+   - Estimated duration: 10-20 minutes
+   - Difficulty level
+
+Return ONLY valid JSON:
+{
+  "primary_focus": "${profile.primary_skill}",
+  "secondary_focus": "${profile.secondary_skill}",
+  "tasks": [
+    {
+      "day": 1,
+      "task_type": "speaking",
+      "skill": "speaking",
+      "title": "Engaging title related to interests",
+      "difficulty": "easy|medium|hard",
+      "estimated_minutes": 15
+    }
+  ]
+}`;
+
+      const modelName = await getModel(activeGeminiKey);
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${activeGeminiKey}`;
+
+      const response = await fetch(geminiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: ADAPTIVE_PLAN_PROMPT }] }],
+          generation_config: { response_mime_type: "application/json" }
+        })
+      });
+
+      const result = await response.json();
+      if (!response.ok || !result.candidates?.[0]) {
+        console.error("Gemini Error (Adaptive Plan):", JSON.stringify(result));
+        throw new Error(result.error?.message || "Gemini returned an error for Adaptive Plan");
+      }
+
+      const aiText = result.candidates[0].content.parts[0].text;
+      const planData = extractJSON(aiText);
+
+      console.log(`[generate_adaptive_weekly_plan] Plan generated with ${planData.tasks.length} tasks`);
+
+      // Create Weekly Plan
+      const { data: newPlan, error: planError } = await supabase
+        .from('weekly_plans')
+        .insert({
+          user_id: user_id,
+          week_start: week_start,
+          primary_focus: planData.primary_focus,
+          secondary_focus: planData.secondary_focus,
+          generated_from_snapshot: snapshot_id,
+          status: 'active',
+          teacher_adjusted: false,
+          regeneration_reason: regeneration_reason,
+          level: user_level
+        })
+        .select()
+        .single();
+
+      if (planError) {
+        console.error('[generate_adaptive_weekly_plan] Error creating plan:', planError);
+        throw planError;
+      }
+
+      console.log(`[generate_adaptive_weekly_plan] Plan created with ID: ${newPlan.id}`);
+
+      // Create Daily Tasks
+      const tasks = planData.tasks.map((t: any) => ({
+        plan_id: newPlan.id,
+        user_id: user_id,
+        day_of_week: t.day,
+        task_type: t.task_type,
+        skill: t.skill,
+        content: { title: t.title },
+        estimated_minutes: t.estimated_minutes,
+        difficulty: t.difficulty,
+        generated_by: 'ai',
+        completed: false
+      }));
+
+      const { error: tasksError } = await supabase
+        .from('daily_tasks')
+        .insert(tasks);
+
+      if (tasksError) {
+        console.error('[generate_adaptive_weekly_plan] Error creating tasks:', tasksError);
+        throw tasksError;
+      }
+
+      console.log(`[generate_adaptive_weekly_plan] ${tasks.length} tasks created successfully`);
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          plan_id: newPlan.id,
+          primary_focus: planData.primary_focus,
+          secondary_focus: planData.secondary_focus,
+          tasks_count: tasks.length
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Existing actions below...
     if (action === 'generate_weekly_plan') {
       const activeOpenAIKey = await getOpenAIKey();

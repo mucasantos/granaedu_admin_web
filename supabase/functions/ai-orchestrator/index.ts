@@ -539,7 +539,7 @@ Return ONLY valid JSON:
         plan_id: newPlan.id,
         user_id: user_id,
         day_of_week: t.day,
-        task_type: t.task_type,
+        task_type: t.task_type || t.skill, // Fallback to skill if task_type is missing
         skill: t.skill,
         content: { title: t.title },
         estimated_minutes: t.estimated_minutes,

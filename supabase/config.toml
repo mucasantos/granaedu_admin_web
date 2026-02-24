@@ -365,7 +365,7 @@ verify_jwt = false  # Allow user JWTs (function validates internally)
 
 [functions.reading-assistant]
 enabled = true
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/reading-assistant/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
@@ -373,3 +373,6 @@ entrypoint = "./functions/reading-assistant/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/reading-assistant/*.html" ]
+
+[functions.generate-initial-plan]
+verify_jwt = false

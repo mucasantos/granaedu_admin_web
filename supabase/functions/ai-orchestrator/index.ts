@@ -420,16 +420,23 @@ serve(async (req: Request) => {
     // ADAPTIVE WEEKLY PLAN - Conditional Regeneration (Phase 2)
     // ============================================================================
     if (action === 'generate_adaptive_weekly_plan') {
+      console.log(`[ai-orchestrator][generate_adaptive_weekly_plan] Started for user_id: ${user_id}`);
       const activeGeminiKey = await getGeminiKey();
-      if (!activeGeminiKey) throw new Error('Gemini API Key is required');
+      if (!activeGeminiKey) {
+        console.error(`[ai-orchestrator][generate_adaptive_weekly_plan] Missing Gemini API Key!`);
+        throw new Error('Gemini API Key is required');
+      }
 
       const { week_start, snapshot_id, profile, user_level, user_goal, user_interests, regeneration_reason } = body;
 
-      if (!profile) throw new Error('User profile required for adaptive plan generation');
+      if (!profile) {
+        console.error(`[ai-orchestrator][generate_adaptive_weekly_plan] Missing user profile object in body!`);
+        throw new Error('User profile required for adaptive plan generation');
+      }
 
-      console.log(`[generate_adaptive_weekly_plan] Generating adaptive plan for user ${user_id}`);
-      console.log(`[generate_adaptive_weekly_plan] Reason: ${regeneration_reason}`);
-      console.log(`[generate_adaptive_weekly_plan] FI: ${profile.fluency_index}, Primary: ${profile.primary_skill}`);
+      console.log(`[ai-orchestrator][generate_adaptive_weekly_plan] Reason: ${regeneration_reason}`);
+      console.log(`[ai-orchestrator][generate_adaptive_weekly_plan] Snapshot ID: ${snapshot_id}`);
+      console.log(`[ai-orchestrator][generate_adaptive_weekly_plan] FI: ${profile.fluency_index}, Primary Focus: ${profile.primary_skill}`);
 
       const ADAPTIVE_PLAN_PROMPT = `You are an expert adaptive English learning curriculum designer.
 
@@ -490,6 +497,7 @@ Return ONLY valid JSON:
       const modelName = await getModel(activeGeminiKey);
       const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${activeGeminiKey}`;
 
+      console.log(`[ai-orchestrator][generate_adaptive_weekly_plan] Calling Gemini...`);
       const response = await fetch(geminiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -499,18 +507,23 @@ Return ONLY valid JSON:
         })
       });
 
+      console.log(`[ai-orchestrator][generate_adaptive_weekly_plan] Received status ${response.status} from Gemini`);
+
       const result = await response.json();
       if (!response.ok || !result.candidates?.[0]) {
-        console.error("Gemini Error (Adaptive Plan):", JSON.stringify(result));
+        console.error("[ai-orchestrator][generate_adaptive_weekly_plan] Gemini Error (Adaptive Plan):", JSON.stringify(result));
         throw new Error(result.error?.message || "Gemini returned an error for Adaptive Plan");
       }
+
+      console.log(`[ai-orchestrator][generate_adaptive_weekly_plan] Successfully received content from Gemini, extracting JSON...`);
 
       const aiText = result.candidates[0].content.parts[0].text;
       const planData = extractJSON(aiText);
 
-      console.log(`[generate_adaptive_weekly_plan] Plan generated with ${planData.tasks.length} tasks`);
+      console.log(`[ai-orchestrator][generate_adaptive_weekly_plan] Plan JSON extracted successfully with ${planData.tasks?.length} tasks`);
 
       // Create Weekly Plan
+      console.log(`[ai-orchestrator][generate_adaptive_weekly_plan] Inserting into weekly_plans...`);
       const { data: newPlan, error: planError } = await supabase
         .from('weekly_plans')
         .insert({
@@ -528,13 +541,14 @@ Return ONLY valid JSON:
         .single();
 
       if (planError) {
-        console.error('[generate_adaptive_weekly_plan] Error creating plan:', planError);
+        console.error('[ai-orchestrator][generate_adaptive_weekly_plan] Error creating plan in DB:', planError);
         throw planError;
       }
 
-      console.log(`[generate_adaptive_weekly_plan] Plan created with ID: ${newPlan.id}`);
+      console.log(`[ai-orchestrator][generate_adaptive_weekly_plan] Plan created with ID: ${newPlan.id}`);
 
       // Create Daily Tasks
+      console.log(`[ai-orchestrator][generate_adaptive_weekly_plan] Inserting daily tasks...`);
       const tasks = planData.tasks.map((t: any) => ({
         plan_id: newPlan.id,
         user_id: user_id,
@@ -553,11 +567,12 @@ Return ONLY valid JSON:
         .insert(tasks);
 
       if (tasksError) {
-        console.error('[generate_adaptive_weekly_plan] Error creating tasks:', tasksError);
+        console.error('[ai-orchestrator][generate_adaptive_weekly_plan] Error creating tasks in DB:', tasksError);
         throw tasksError;
       }
 
-      console.log(`[generate_adaptive_weekly_plan] ${tasks.length} tasks created successfully`);
+      console.log(`[ai-orchestrator][generate_adaptive_weekly_plan] ${tasks.length} tasks created successfully`);
+      console.log(`[ai-orchestrator][generate_adaptive_weekly_plan] Finished adaptive plan generation for user ${user_id}`);
 
       return new Response(
         JSON.stringify({

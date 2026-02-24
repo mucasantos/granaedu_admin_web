@@ -221,11 +221,18 @@ serve(async (req: Request) => {
       // Note: transcription key from Gemini might be 'transcript' or 'transcription'
       const transcriptText = resultJson.transcript || resultJson.transcription || '';
 
+      // Validate UUID for task_id to prevent foreign key errors for initial assessments
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const validTaskId = taskId && uuidRegex.test(taskId) ? taskId : null;
+      if (taskId && !validTaskId) {
+        console.log(`[speaking-analyzer] Invalid task_id "${taskId}", replacing with null`);
+      }
+
       const { data: submissionData, error: dbError } = await supabase
         .from('speaking_submissions')
         .insert({
           user_id: userId,
-          task_id: taskId,
+          task_id: validTaskId,
           audio_url: publicUrl,
           transcript: transcriptText,
           analysis_json: resultJson,
